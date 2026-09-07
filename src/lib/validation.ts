@@ -26,7 +26,6 @@ export const eventDetailsSchema = z.object({
 
 export const classEntrySchema = z.object({
   className: z.string().trim().min(1, "Class name is required"),
-  laps: z.coerce.number().int().min(1, "Must be at least 1"),
   numRacers: z.coerce.number().int().min(0, "Cannot be negative"),
 });
 
@@ -37,6 +36,7 @@ export const gateDropSchema = z.object({
 
 export const raceSchema = z.object({
   raceNumber: z.coerce.number().int().min(1, "Must be at least 1"),
+  laps: z.coerce.number().int().min(1, "Must be at least 1"),
   gateDrops: z.array(gateDropSchema).min(1, "Add at least one gate drop"),
 });
 

@@ -10,6 +10,7 @@ import {
   restartLineup,
 } from "@/lib/lineup";
 import { lineupSchema } from "@/lib/validation";
+import { parseScheduleFile } from "@/lib/schedule-import";
 
 export type LineupFormState = { error?: string };
 
@@ -35,6 +36,45 @@ export async function saveLineupAction(
   }
 
   await replaceLineup(event.id, parsed.data);
+
+  revalidatePath(`/dashboard/events/${event.id}`);
+  revalidatePath(`/events/${event.slug}`);
+  redirect(`/dashboard/events/${event.id}`);
+}
+
+export type UploadScheduleState = { error?: string };
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+export async function uploadScheduleAction(
+  _prevState: UploadScheduleState,
+  formData: FormData
+): Promise<UploadScheduleState> {
+  const user = await requireRole("PROMOTER");
+  const eventId = String(formData.get("eventId") ?? "");
+  const event = await requireEventAccess(eventId, user);
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Choose a .xlsx or .csv file to upload." };
+  }
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: "That file is too large (5MB max)." };
+  }
+
+  const filename = file.name.toLowerCase();
+  if (!filename.endsWith(".xlsx") && !filename.endsWith(".csv")) {
+    return { error: "Only .xlsx or .csv files are supported." };
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const result = await parseScheduleFile(buffer, filename);
+  if (!result.success) {
+    return { error: result.error };
+  }
+
+  await replaceLineup(event.id, result.lineup);
 
   revalidatePath(`/dashboard/events/${event.id}`);
   revalidatePath(`/events/${event.slug}`);

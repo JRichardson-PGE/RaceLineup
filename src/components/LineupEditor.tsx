@@ -5,7 +5,6 @@ import { saveLineupAction, type LineupFormState } from "@/actions/lineup";
 
 type ClassEntryDraft = {
   className: string;
-  laps: number;
   numRacers: number;
 };
 
@@ -14,13 +13,14 @@ type GateDropDraft = {
   classEntries: ClassEntryDraft[];
 };
 
-type RaceDraft = {
+export type RaceDraft = {
   raceNumber: number;
+  laps: number;
   gateDrops: GateDropDraft[];
 };
 
 function emptyClassEntry(): ClassEntryDraft {
-  return { className: "", laps: 1, numRacers: 0 };
+  return { className: "", numRacers: 0 };
 }
 
 function emptyGateDrop(gateNumber: number): GateDropDraft {
@@ -28,7 +28,7 @@ function emptyGateDrop(gateNumber: number): GateDropDraft {
 }
 
 function emptyRace(raceNumber: number): RaceDraft {
-  return { raceNumber, gateDrops: [emptyGateDrop(1)] };
+  return { raceNumber, laps: 1, gateDrops: [emptyGateDrop(1)] };
 }
 
 function move<T>(list: T[], index: number, direction: -1 | 1): T[] {
@@ -126,6 +126,26 @@ export function LineupEditor({
                     }))
                   }
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Laps
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  className={`${inputClasses} w-20`}
+                  value={race.laps}
+                  onChange={(e) =>
+                    updateRace(raceIndex, (r) => ({
+                      ...r,
+                      laps: Number(e.target.value),
+                    }))
+                  }
+                />
+                <span className="text-xs text-gray-500">
+                  (all gates in this race)
+                </span>
               </div>
               <div className="flex gap-1">
                 <button
@@ -244,21 +264,6 @@ export function LineupEditor({
                             }))
                           }
                         />
-                        <label className="flex items-center gap-1 text-xs text-gray-600">
-                          Laps
-                          <input
-                            type="number"
-                            min={1}
-                            className={`${inputClasses} w-16`}
-                            value={entry.laps}
-                            onChange={(e) =>
-                              updateEntry(raceIndex, gateIndex, entryIndex, (c) => ({
-                                ...c,
-                                laps: Number(e.target.value),
-                              }))
-                            }
-                          />
-                        </label>
                         <label className="flex items-center gap-1 text-xs text-gray-600">
                           Racers
                           <input

@@ -1,7 +1,6 @@
 export type ClassEntryData = {
   id: string;
   className: string;
-  laps: number;
   numRacers: number;
 };
 
@@ -14,6 +13,7 @@ export type GateDropData = {
 export type RaceData = {
   id: string;
   raceNumber: number;
+  laps: number;
   gateDrops: GateDropData[];
 };
 
@@ -53,7 +53,10 @@ export function LineupTable({ races, currentRaceId }: LineupTableProps) {
           >
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-semibold text-gray-900">
-                Race #{race.raceNumber}
+                Race #{race.raceNumber}{" "}
+                <span className="font-normal text-gray-500">
+                  &middot; {race.laps} laps
+                </span>
               </h3>
               {isCurrent && (
                 <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
@@ -62,7 +65,7 @@ export function LineupTable({ races, currentRaceId }: LineupTableProps) {
               )}
               {isNext && (
                 <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
-                  Staging next
+                  On The Line
                 </span>
               )}
             </div>
@@ -83,7 +86,7 @@ export function LineupTable({ races, currentRaceId }: LineupTableProps) {
                           {entry.className}
                         </span>
                         <span className="text-gray-500">
-                          {entry.laps} laps &middot; {entry.numRacers} racers
+                          {entry.numRacers} racers
                         </span>
                       </li>
                     ))}

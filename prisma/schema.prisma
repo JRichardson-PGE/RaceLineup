@@ -46,6 +46,7 @@ model Race {
   id         String @id @default(cuid())
   raceNumber Int
   position   Int
+  laps       Int
 
   eventId String
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -73,7 +74,6 @@ model GateDrop {
 model ClassEntry {
   id        String @id @default(cuid())
   className String
-  laps      Int
   numRacers Int
 
   gateDropId String

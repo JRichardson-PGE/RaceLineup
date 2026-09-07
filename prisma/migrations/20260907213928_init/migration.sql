@@ -35,6 +35,7 @@ CREATE TABLE "Race" (
     "id" TEXT NOT NULL,
     "raceNumber" INTEGER NOT NULL,
     "position" INTEGER NOT NULL,
+    "laps" INTEGER NOT NULL,
     "eventId" TEXT NOT NULL,
 
     CONSTRAINT "Race_pkey" PRIMARY KEY ("id")
@@ -54,7 +55,6 @@ CREATE TABLE "GateDrop" (
 CREATE TABLE "ClassEntry" (
     "id" TEXT NOT NULL,
     "className" TEXT NOT NULL,
-    "laps" INTEGER NOT NULL,
     "numRacers" INTEGER NOT NULL,
     "gateDropId" TEXT NOT NULL,
 

@@ -71,6 +71,7 @@ export async function replaceLineup(eventId: string, lineup: LineupInput) {
         data: {
           eventId,
           raceNumber: race.raceNumber,
+          laps: race.laps,
           position: raceIndex,
         },
       });
@@ -89,7 +90,6 @@ export async function replaceLineup(eventId: string, lineup: LineupInput) {
           data: gate.classEntries.map((entry) => ({
             gateDropId: createdGate.id,
             className: entry.className,
-            laps: entry.laps,
             numRacers: entry.numRacers,
           })),
         });
