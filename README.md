@@ -2,10 +2,14 @@
 
 A mobile-friendly web app for race promoters to publish and run a live race
 lineup. Public visitors pick an event and see the schedule with the current
-and next-up race highlighted, refreshing automatically. Promoters build the
-lineup (races, gate drops, classes) and drive it live during the event
-(advance / move back / restart). Admins do everything a promoter can, plus
-create promoter accounts and see every event in the system.
+race ("On Track") and next-up race ("On The Line") highlighted, refreshing
+automatically. Promoters build the lineup (races, gate drops, classes) — by
+hand, or by uploading an Excel/CSV schedule — and drive it live during the
+event (advance / move back / restart). Admins do everything a promoter can,
+plus create promoter accounts and see every event in the system.
+
+Each race has a single lap count shared by every gate drop in it; a race can
+have multiple gate drops, and each gate drop can list multiple classes.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
@@ -38,13 +42,21 @@ account.
 - `src/app/api/lineup/[slug]` — JSON endpoint the public page polls every 60s.
 - `src/app/login`, `src/proxy.ts` — auth; `proxy.ts` (Next 16's renamed
   middleware) guards everything under `/dashboard`.
-- `src/app/dashboard` — promoter/admin area: manage events, edit the lineup,
-  and the live control panel (advance/back/restart). `dashboard/admin` is
-  admin-only (promoter account creation, all-events view).
+- `src/app/dashboard` — promoter/admin area: manage events, edit the lineup
+  (by hand or by uploading a schedule file), and the live control panel
+  (advance/back/restart). `dashboard/admin` is admin-only (promoter account
+  creation, all-events view).
+- `src/lib/schedule-import.ts` — parses an uploaded `.xlsx`/`.csv` schedule
+  (via `exceljs`/`papaparse`) into the lineup shape, matching column headers
+  flexibly and validating that every gate drop within a race shares one lap
+  count. `public/templates/` holds the downloadable templates promoters fill
+  out; regenerate the `.xlsx` one with `npm run generate:template` after
+  changing its columns (the `.csv` is a plain text file, edit it directly).
 - `src/actions` — Server Actions (mutations); `src/lib` — data access,
   session/auth, validation.
 - `prisma/schema.prisma` — data model (`User`, `Event`, `Race`, `GateDrop`,
-  `ClassEntry`).
+  `ClassEntry`). `laps` lives on `Race` since all of a race's gate drops run
+  the same distance.
 
 ## Deploying to an EC2 instance (Docker Compose)
 
