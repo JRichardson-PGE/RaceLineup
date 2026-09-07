@@ -16,8 +16,14 @@ posted" rather than a 404, so promoters can safely share a link early.
 Promoter/admin accounts sign in with either an email or a standalone
 username (an admin can create a promoter with no email at all — useful for
 accounts that shouldn't have self-service password reset). Admins can also
-delete accounts (which deletes that promoter's events too) and filter the
-all-events view by promoter name.
+delete accounts (which deletes that promoter's events too), reset any
+account's password, and filter the all-events view by promoter name. Every
+logged-in user has a profile page (linked from their name in the header) to
+change their own password or attach/update a recovery email.
+
+Both the public and dashboard event lists split into "Upcoming" and "Past"
+sections by date automatically. Each event's control panel has "Copy link"
+and "Show QR code" buttons for sharing its public page.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
@@ -52,8 +58,13 @@ account.
   middleware) guards everything under `/dashboard`.
 - `src/app/dashboard` — promoter/admin area: manage events, edit the lineup
   (by hand or by uploading a schedule file), and the live control panel
-  (advance/back/restart). `dashboard/admin` is admin-only (promoter account
-  creation, all-events view).
+  (advance/back/restart, copy link, QR code). `dashboard/admin` is
+  admin-only (promoter account creation/deletion/password reset, all-events
+  view). `dashboard/profile` is any logged-in user's own settings (password,
+  recovery email).
+- `src/lib/lineup.ts`'s `partitionEventsByDate` splits a list of events into
+  upcoming (soonest first) and past (most recent first) using UTC date
+  comparison — used by both the public and dashboard event lists.
 - `src/lib/schedule-import.ts` — parses an uploaded `.xlsx`/`.csv` schedule
   (via `exceljs`/`papaparse`) into the lineup shape, matching column headers
   flexibly and validating that every gate drop within a race shares one lap

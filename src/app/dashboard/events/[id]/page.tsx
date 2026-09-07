@@ -8,6 +8,8 @@ import {
   restartLineupAction,
 } from "@/actions/lineup";
 import { LineupTable } from "@/components/LineupTable";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { EventQrCode } from "@/components/EventQrCode";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -71,7 +73,7 @@ export default async function EventControlPage({
         </div>
       </div>
 
-      {event.published && (
+      <div className="flex flex-wrap items-center gap-2">
         <Link
           href={`/events/${event.slug}`}
           target="_blank"
@@ -79,6 +81,15 @@ export default async function EventControlPage({
         >
           View public page &rarr;
         </Link>
+        <CopyLinkButton path={`/events/${event.slug}`} />
+        <EventQrCode path={`/events/${event.slug}`} />
+      </div>
+      {!event.published && (
+        <p className="text-sm text-gray-500">
+          This event isn&apos;t published yet — the public page will show
+          &ldquo;the race lineup is not yet posted&rdquo; until you publish
+          it. The link above is safe to share early.
+        </p>
       )}
 
       <div className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4">

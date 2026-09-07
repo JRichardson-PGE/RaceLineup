@@ -67,11 +67,36 @@ export function listAllEvents(promoterNameFilter?: string) {
   });
 }
 
-export function listPublishedEvents() {
+export function listEventsPublic() {
   return prisma.event.findMany({
-    where: { published: true },
     orderBy: { eventDate: "desc" },
   });
+}
+
+export function isPastEventDate(eventDate: Date): boolean {
+  const now = new Date();
+  const todayUtc = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  return eventDate.getTime() < todayUtc;
+}
+
+export function partitionEventsByDate<T extends { eventDate: Date }>(
+  events: T[]
+): { upcoming: T[]; past: T[] } {
+  const upcoming: T[] = [];
+  const past: T[] = [];
+
+  for (const event of events) {
+    (isPastEventDate(event.eventDate) ? past : upcoming).push(event);
+  }
+
+  upcoming.sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+  past.sort((a, b) => b.eventDate.getTime() - a.eventDate.getTime());
+
+  return { upcoming, past };
 }
 
 type LineupInput = z.infer<typeof lineupSchema>;

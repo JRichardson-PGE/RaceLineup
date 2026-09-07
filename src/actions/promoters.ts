@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
-import { createPromoterSchema } from "@/lib/validation";
+import { adminSetPasswordSchema, createPromoterSchema } from "@/lib/validation";
 
 export type CreatePromoterState = { error?: string; success?: boolean };
 
@@ -96,4 +96,29 @@ export async function deleteUserAction(formData: FormData) {
 
   revalidatePath("/dashboard/admin/promoters");
   revalidatePath("/dashboard");
+}
+
+export type AdminSetPasswordState = { error?: string; success?: boolean };
+
+export async function adminSetPasswordAction(
+  _prevState: AdminSetPasswordState,
+  formData: FormData
+): Promise<AdminSetPasswordState> {
+  await requireRole("ADMIN");
+  const userId = String(formData.get("userId") ?? "");
+
+  const parsed = adminSetPasswordSchema.safeParse({
+    newPassword: formData.get("newPassword"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.newPassword);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
+
+  return { success: true };
 }

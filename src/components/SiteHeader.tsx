@@ -29,9 +29,12 @@ export async function SiteHeader() {
         <div className="flex items-center gap-3 text-sm">
           {session ? (
             <>
-              <span className="text-gray-500">
+              <Link
+                href="/dashboard/profile"
+                className="text-gray-500 hover:text-gray-900"
+              >
                 {session.name} &middot; {session.role.toLowerCase()}
-              </span>
+              </Link>
               <form action={logoutAction}>
                 <button
                   type="submit"

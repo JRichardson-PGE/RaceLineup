@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
-import { listAllEvents, listEventsForPromoter } from "@/lib/lineup";
+import {
+  listAllEvents,
+  listEventsForPromoter,
+  partitionEventsByDate,
+} from "@/lib/lineup";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -11,6 +15,43 @@ function formatDate(date: Date) {
   });
 }
 
+type DashboardEvent = {
+  id: string;
+  name: string;
+  location: string;
+  eventDate: Date;
+  published: boolean;
+  promoterName: string | null;
+};
+
+function EventCard({ event }: { event: DashboardEvent }) {
+  return (
+    <li>
+      <Link
+        href={`/dashboard/events/${event.id}`}
+        className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:border-gray-400"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-lg font-semibold text-gray-900">{event.name}</p>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
+              event.published
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {event.published ? "Published" : "Draft"}
+          </span>
+        </div>
+        <p className="text-sm text-gray-500">
+          {event.location} &middot; {formatDate(event.eventDate)}
+          {event.promoterName ? ` · ${event.promoterName}` : ""}
+        </p>
+      </Link>
+    </li>
+  );
+}
+
 export default async function DashboardPage({
   searchParams,
 }: PageProps<"/dashboard">) {
@@ -19,7 +60,7 @@ export default async function DashboardPage({
   const promoterFilterValue =
     typeof promoterFilter === "string" ? promoterFilter : "";
 
-  const events =
+  const events: DashboardEvent[] =
     user.role === "ADMIN"
       ? (await listAllEvents(promoterFilterValue || undefined)).map(
           (event) => ({
@@ -29,8 +70,10 @@ export default async function DashboardPage({
         )
       : (await listEventsForPromoter(user.sub)).map((event) => ({
           ...event,
-          promoterName: null as string | null,
+          promoterName: null,
         }));
+
+  const { upcoming, past } = partitionEventsByDate(events);
 
   return (
     <>
@@ -79,35 +122,30 @@ export default async function DashboardPage({
             : "No events yet. Create your first event to get started."}
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {events.map((event) => (
-            <li key={event.id}>
-              <Link
-                href={`/dashboard/events/${event.id}`}
-                className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:border-gray-400"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-lg font-semibold text-gray-900">
-                    {event.name}
-                  </p>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
-                      event.published
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {event.published ? "Published" : "Draft"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  {event.location} &middot; {formatDate(event.eventDate)}
-                  {event.promoterName ? ` · ${event.promoterName}` : ""}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          {upcoming.length === 0 ? (
+            <p className="text-sm text-gray-500">No upcoming events.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {upcoming.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </ul>
+          )}
+
+          {past.length > 0 && (
+            <div className="mt-6 flex flex-col gap-3">
+              <h2 className="text-lg font-bold text-gray-900">
+                Past Events
+              </h2>
+              <ul className="flex flex-col gap-3">
+                {past.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
     </>
   );
