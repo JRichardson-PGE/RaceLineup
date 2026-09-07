@@ -90,6 +90,13 @@ export default async function EventControlPage({
         </Link>
         <CopyLinkButton path={`/events/${event.slug}`} />
         <EventQrCode path={`/events/${event.slug}`} />
+        <Link
+          href={`/dashboard/events/${event.id}/print`}
+          target="_blank"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        >
+          Print PDF
+        </Link>
       </div>
       {!event.published && (
         <p className="text-sm text-gray-500">

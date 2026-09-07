@@ -22,7 +22,7 @@ export default async function PublicEventPage({
   if (event) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 p-4">
-        <div>
+        <div className="sticky top-0 z-10 -mx-4 bg-[var(--background)] px-4 pb-2">
           <h1 className="text-2xl font-bold text-gray-900">{event.name}</h1>
           <p className="text-sm text-gray-500">
             {event.location} &middot; {formatDate(event.eventDate)}

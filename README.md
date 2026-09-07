@@ -22,8 +22,17 @@ logged-in user has a profile page (linked from their name in the header) to
 change their own password or attach/update a recovery email.
 
 Both the public and dashboard event lists split into "Upcoming" and "Past"
-sections by date automatically. Each event's control panel has "Copy link"
-and "Show QR code" buttons for sharing its public page.
+sections by date automatically. Each event's control panel has "Copy link",
+"Show QR code", and "Print PDF" buttons — the last opens a print-ready,
+letter-size table of the lineup (race/laps/gate/class/riders, grouped and
+bordered by race, with headers repeating on each printed page) that the
+promoter prints or saves as a PDF from the browser's print dialog.
+
+On the dashboard, the lineup is its own scrollable panel below the fixed
+control buttons, auto-scrolling to the current race whenever it changes (and
+back to the top on restart). The public page keeps its event header pinned
+in place (`position: sticky`) while the lineup scrolls beneath it, and
+auto-scrolls to the current race once when the page first loads.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session

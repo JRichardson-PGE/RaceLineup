@@ -13,10 +13,15 @@ export function LineupFrame({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!currentRaceId) return;
-    const el = containerRef.current?.querySelector(
-      `[data-race-id="${currentRaceId}"]`
-    );
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (!currentRaceId) {
+      container.scrollTop = 0;
+      return;
+    }
+
+    const el = container.querySelector(`[data-race-id="${currentRaceId}"]`);
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [currentRaceId]);
 

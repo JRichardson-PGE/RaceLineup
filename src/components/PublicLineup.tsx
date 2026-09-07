@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LineupTable, type RaceData } from "@/components/LineupTable";
 
 const POLL_INTERVAL_MS = 60_000;
@@ -17,10 +17,11 @@ export function PublicLineup({
   const [races, setRaces] = useState(initialRaces);
   const [currentRaceId, setCurrentRaceId] = useState(initialCurrentRaceId);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!initialCurrentRaceId) return;
-    const el = document.querySelector(
+    const el = containerRef.current?.querySelector(
       `[data-race-id="${initialCurrentRaceId}"]`
     );
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -54,7 +55,7 @@ export function PublicLineup({
   }, [slug]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={containerRef} className="flex flex-col gap-3">
       <LineupTable races={races} currentRaceId={currentRaceId} />
       {lastUpdated && (
         <p className="text-center text-xs text-gray-400">
