@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  PROMOTER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(PROMOTER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events Event[]
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  location  String
+  eventDate DateTime
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  promoterId String
+  promoter   User   @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+
+  races Race[]
+
+  currentRaceId String? @unique
+  currentRace   Race?   @relation("CurrentRace", fields: [currentRaceId], references: [id], onDelete: SetNull)
+}
+
+model Race {
+  id         String @id @default(cuid())
+  raceNumber Int
+  position   Int
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  gateDrops GateDrop[]
+
+  currentForEvent Event? @relation("CurrentRace")
+
+  @@unique([eventId, position])
+}
+
+model GateDrop {
+  id         String @id @default(cuid())
+  gateNumber Int
+  position   Int
+
+  raceId String
+  race   Race   @relation(fields: [raceId], references: [id], onDelete: Cascade)
+
+  classEntries ClassEntry[]
+
+  @@unique([raceId, position])
+}
+
+model ClassEntry {
+  id        String @id @default(cuid())
+  className String
+  laps      Int
+  numRacers Int
+
+  gateDropId String
+  gateDrop   GateDrop @relation(fields: [gateDropId], references: [id], onDelete: Cascade)
+}

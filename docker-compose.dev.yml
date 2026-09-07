@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: racelineup
+      POSTGRES_PASSWORD: racelineup
+      POSTGRES_DB: racelineup
+    ports:
+      - "5432:5432"
+    volumes:
+      - racelineup_dev_db:/var/lib/postgresql/data
+
+volumes:
+  racelineup_dev_db:
