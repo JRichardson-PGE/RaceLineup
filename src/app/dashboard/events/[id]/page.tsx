@@ -10,12 +10,11 @@ import {
 import { LineupTable } from "@/components/LineupTable";
 
 function formatDate(date: Date) {
-  return new Date(date).toLocaleString(undefined, {
+  return new Date(date).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+    timeZone: "UTC",
   });
 }
 

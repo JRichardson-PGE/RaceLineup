@@ -5,12 +5,12 @@ import { updateEventAction, type EventFormState } from "@/actions/events";
 
 const initialState: EventFormState = {};
 
-function toDateTimeLocalValue(date: Date | string) {
+function toDateInputValue(date: Date | string) {
   const d = new Date(date);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  // Use UTC getters: eventDate is stored as a date-only value (UTC midnight),
+  // so local getters could shift it a day in timezones behind UTC.
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
 
 export function EditEventForm({
@@ -60,14 +60,14 @@ export function EditEventForm({
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="eventDate" className="text-sm font-medium text-gray-700">
-          Date &amp; time
+          Date
         </label>
         <input
           id="eventDate"
           name="eventDate"
-          type="datetime-local"
+          type="date"
           required
-          defaultValue={toDateTimeLocalValue(event.eventDate)}
+          defaultValue={toDateInputValue(event.eventDate)}
           className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
         />
       </div>

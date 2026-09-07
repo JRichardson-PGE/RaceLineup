@@ -47,12 +47,12 @@ export default function NewEventPage() {
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="eventDate" className="text-sm font-medium text-gray-700">
-            Date &amp; time
+            Date
           </label>
           <input
             id="eventDate"
             name="eventDate"
-            type="datetime-local"
+            type="date"
             required
             className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
           />

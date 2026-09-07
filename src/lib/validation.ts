@@ -1,21 +1,55 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().trim().email(),
+  identifier: z.string().trim().toLowerCase().min(1, "Enter your email or username"),
   password: z.string().min(1, "Password is required"),
 });
 
-export const createPromoterSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  email: z.string().trim().email(),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["ADMIN", "PROMOTER"]),
-});
+export const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, "Must be at least 3 characters")
+  .max(32, "Must be 32 characters or fewer")
+  .regex(/^[a-z0-9._-]+$/, "Use lowercase letters, numbers, and . _ - only");
+
+export const createPromoterSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required"),
+    loginType: z.enum(["email", "username"]),
+    email: z.string().trim().toLowerCase().optional(),
+    username: z.string().trim().toLowerCase().optional(),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    role: z.enum(["ADMIN", "PROMOTER"]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.loginType === "email") {
+      const result = z.string().email().safeParse(data.email ?? "");
+      if (!result.success) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["email"],
+          message: "Enter a valid email address",
+        });
+      }
+    } else {
+      const result = usernameSchema.safeParse(data.username ?? "");
+      if (!result.success) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["username"],
+          message: result.error.issues[0]?.message ?? "Invalid username",
+        });
+      }
+    }
+  });
 
 export const eventDetailsSchema = z.object({
   name: z.string().trim().min(1, "Event name is required"),
   location: z.string().trim().min(1, "Location is required"),
-  eventDate: z.string().min(1, "Event date is required"),
+  eventDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date"),
   slug: z
     .string()
     .trim()

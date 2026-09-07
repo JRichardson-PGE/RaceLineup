@@ -7,18 +7,26 @@ function formatDate(date: Date) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: PageProps<"/dashboard">) {
   const user = await requireUser();
+  const { promoter: promoterFilter } = await searchParams;
+  const promoterFilterValue =
+    typeof promoterFilter === "string" ? promoterFilter : "";
 
   const events =
     user.role === "ADMIN"
-      ? (await listAllEvents()).map((event) => ({
-          ...event,
-          promoterName: event.promoter.name,
-        }))
+      ? (await listAllEvents(promoterFilterValue || undefined)).map(
+          (event) => ({
+            ...event,
+            promoterName: event.promoter.name,
+          })
+        )
       : (await listEventsForPromoter(user.sub)).map((event) => ({
           ...event,
           promoterName: null as string | null,
@@ -38,9 +46,37 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {user.role === "ADMIN" && (
+        <form method="get" className="flex items-center gap-2">
+          <input
+            type="text"
+            name="promoter"
+            defaultValue={promoterFilterValue}
+            placeholder="Filter by promoter name"
+            className="w-full max-w-xs rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900"
+          />
+          <button
+            type="submit"
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Filter
+          </button>
+          {promoterFilterValue && (
+            <Link
+              href="/dashboard"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900"
+            >
+              Clear
+            </Link>
+          )}
+        </form>
+      )}
+
       {events.length === 0 ? (
         <p className="text-sm text-gray-500">
-          No events yet. Create your first event to get started.
+          {promoterFilterValue
+            ? `No events found for promoters matching "${promoterFilterValue}".`
+            : "No events yet. Create your first event to get started."}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">

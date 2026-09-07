@@ -34,6 +34,18 @@ export function getEventBySlugPublic(slug: string) {
   });
 }
 
+export function getEventBySlugSummary(slug: string) {
+  return prisma.event.findUnique({
+    where: { slug },
+    select: {
+      name: true,
+      location: true,
+      eventDate: true,
+      published: true,
+    },
+  });
+}
+
 export function listEventsForPromoter(promoterId: string) {
   return prisma.event.findMany({
     where: { promoterId },
@@ -41,10 +53,17 @@ export function listEventsForPromoter(promoterId: string) {
   });
 }
 
-export function listAllEvents() {
+export function listAllEvents(promoterNameFilter?: string) {
   return prisma.event.findMany({
+    where: promoterNameFilter
+      ? {
+          promoter: {
+            name: { contains: promoterNameFilter, mode: "insensitive" },
+          },
+        }
+      : undefined,
     orderBy: { eventDate: "desc" },
-    include: { promoter: { select: { name: true, email: true } } },
+    include: { promoter: { select: { name: true, email: true, username: true } } },
   });
 }
 

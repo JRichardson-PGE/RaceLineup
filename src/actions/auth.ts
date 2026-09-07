@@ -13,30 +13,35 @@ export async function loginAction(
   formData: FormData
 ): Promise<LoginState> {
   const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
+    identifier: formData.get("identifier"),
     password: formData.get("password"),
   });
 
   if (!parsed.success) {
-    return { error: "Enter a valid email and password." };
+    return { error: "Enter your email or username, and password." };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: parsed.data.email },
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: parsed.data.identifier },
+        { username: parsed.data.identifier },
+      ],
+    },
   });
 
   if (!user) {
-    return { error: "Invalid email or password." };
+    return { error: "Invalid login or password." };
   }
 
   const valid = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!valid) {
-    return { error: "Invalid email or password." };
+    return { error: "Invalid login or password." };
   }
 
   await createSessionCookie({
     sub: user.id,
-    email: user.email,
+    login: user.email ?? user.username ?? user.id,
     name: user.name,
     role: user.role,
   });

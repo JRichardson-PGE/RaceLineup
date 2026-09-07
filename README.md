@@ -10,6 +10,14 @@ plus create promoter accounts and see every event in the system.
 
 Each race has a single lap count shared by every gate drop in it; a race can
 have multiple gate drops, and each gate drop can list multiple classes.
+Visiting an unpublished event's link shows "the race lineup is not yet
+posted" rather than a 404, so promoters can safely share a link early.
+
+Promoter/admin accounts sign in with either an email or a standalone
+username (an admin can create a promoter with no email at all — useful for
+accounts that shouldn't have self-service password reset). Admins can also
+delete accounts (which deletes that promoter's events too) and filter the
+all-events view by promoter name.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
@@ -56,7 +64,9 @@ account.
   session/auth, validation.
 - `prisma/schema.prisma` — data model (`User`, `Event`, `Race`, `GateDrop`,
   `ClassEntry`). `laps` lives on `Race` since all of a race's gate drops run
-  the same distance.
+  the same distance. `User.email` and `User.username` are both optional but
+  at least one must be set (enforced in `createPromoterSchema`, not the DB).
+  `Event.eventDate` is a date only (`@db.Date`), no time of day.
 
 ## Deploying to an EC2 instance (Docker Compose)
 

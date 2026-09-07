@@ -4,7 +4,8 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'PROMOTER');
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "email" TEXT,
+    "username" TEXT,
     "passwordHash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'PROMOTER',
@@ -20,7 +21,7 @@ CREATE TABLE "Event" (
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "location" TEXT NOT NULL,
-    "eventDate" TIMESTAMP(3) NOT NULL,
+    "eventDate" DATE NOT NULL,
     "published" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -63,6 +64,9 @@ CREATE TABLE "ClassEntry" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Event_slug_key" ON "Event"("slug");

@@ -7,7 +7,7 @@ export type Role = "ADMIN" | "PROMOTER";
 
 export type SessionPayload = {
   sub: string;
-  email: string;
+  login: string;
   name: string;
   role: Role;
 };
@@ -33,13 +33,13 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
     const { payload } = await jwtVerify(token, getSecretKey());
     if (
       typeof payload.sub === "string" &&
-      typeof payload.email === "string" &&
+      typeof payload.login === "string" &&
       typeof payload.name === "string" &&
       (payload.role === "ADMIN" || payload.role === "PROMOTER")
     ) {
       return {
         sub: payload.sub,
-        email: payload.email,
+        login: payload.login,
         name: payload.name,
         role: payload.role,
       };

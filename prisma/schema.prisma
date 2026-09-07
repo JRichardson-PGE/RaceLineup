@@ -13,7 +13,8 @@ enum Role {
 
 model User {
   id           String   @id @default(cuid())
-  email        String   @unique
+  email        String?  @unique
+  username     String?  @unique
   passwordHash String
   name         String
   role         Role     @default(PROMOTER)
@@ -28,7 +29,7 @@ model Event {
   name      String
   slug      String   @unique
   location  String
-  eventDate DateTime
+  eventDate DateTime @db.Date
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
