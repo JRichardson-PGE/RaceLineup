@@ -7,9 +7,10 @@ import {
   moveBackRaceAction,
   restartLineupAction,
 } from "@/actions/lineup";
-import { LineupTable } from "@/components/LineupTable";
+import { LineupFrame } from "@/components/LineupFrame";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { EventQrCode } from "@/components/EventQrCode";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -29,6 +30,12 @@ export default async function EventControlPage({
   const event = await getEventById(id);
 
   if (!event) return null;
+
+  const currentIndex = event.races.findIndex(
+    (r) => r.id === event.currentRaceId
+  );
+  const canAdvance =
+    event.races.length > 0 && currentIndex + 1 < event.races.length;
 
   return (
     <>
@@ -106,23 +113,24 @@ export default async function EventControlPage({
           <input type="hidden" name="eventId" value={event.id} />
           <button
             type="submit"
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+            disabled={!canAdvance}
+            className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
           >
             Advance &rarr;
           </button>
         </form>
         <form action={restartLineupAction}>
           <input type="hidden" name="eventId" value={event.id} />
-          <button
-            type="submit"
+          <ConfirmSubmitButton
+            confirmMessage="Restart the lineup? This clears the current race and starts back at the beginning."
             className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
           >
             Restart lineup
-          </button>
+          </ConfirmSubmitButton>
         </form>
       </div>
 
-      <LineupTable races={event.races} currentRaceId={event.currentRaceId} />
+      <LineupFrame races={event.races} currentRaceId={event.currentRaceId} />
     </>
   );
 }

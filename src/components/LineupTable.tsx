@@ -43,7 +43,8 @@ export function LineupTable({ races, currentRaceId }: LineupTableProps) {
         return (
           <li
             key={race.id}
-            className={`rounded-lg border p-4 ${
+            data-race-id={race.id}
+            className={`scroll-mt-4 rounded-lg border p-4 ${
               isCurrent
                 ? "border-green-600 bg-green-50 ring-2 ring-green-600"
                 : isNext

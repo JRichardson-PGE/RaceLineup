@@ -19,6 +19,14 @@ export function PublicLineup({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
+    if (!initialCurrentRaceId) return;
+    const el = document.querySelector(
+      `[data-race-id="${initialCurrentRaceId}"]`
+    );
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [initialCurrentRaceId]);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function poll() {
