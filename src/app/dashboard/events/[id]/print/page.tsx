@@ -39,14 +39,21 @@ export default async function PrintLineupPage({
         </p>
       )}
 
-      <table className="w-full border-collapse text-xs">
+      <table className="w-full table-fixed border-collapse text-base">
+        <colgroup>
+          <col className="w-[9%]" />
+          <col className="w-[9%]" />
+          <col className="w-[9%]" />
+          <col className="w-[53%]" />
+          <col className="w-[20%]" />
+        </colgroup>
         <thead>
-          <tr className="border-b-2 border-gray-900 text-left">
-            <th className="px-2 py-1">Race</th>
-            <th className="px-2 py-1">Laps</th>
-            <th className="px-2 py-1">Gate</th>
-            <th className="px-2 py-1">Class</th>
-            <th className="px-2 py-1 text-right">Riders</th>
+          <tr className="border-b-2 border-gray-900 text-left text-lg">
+            <th className="px-3 py-2">Race</th>
+            <th className="px-3 py-2">Laps</th>
+            <th className="px-3 py-2">Gate</th>
+            <th className="px-3 py-2">Class</th>
+            <th className="px-3 py-2 text-right">Riders</th>
           </tr>
         </thead>
         {event.races.map((race, raceIdx) => {
@@ -75,7 +82,7 @@ export default async function PrintLineupPage({
                       {isFirstRowOfRace && (
                         <td
                           rowSpan={totalRows}
-                          className={`${topBorder} px-2 py-1 align-top font-semibold`}
+                          className={`${topBorder} px-3 py-2 align-top text-lg font-bold`}
                         >
                           #{race.raceNumber}
                         </td>
@@ -83,7 +90,7 @@ export default async function PrintLineupPage({
                       {isFirstRowOfRace && (
                         <td
                           rowSpan={totalRows}
-                          className={`${topBorder} px-2 py-1 align-top`}
+                          className={`${topBorder} px-3 py-2 align-top`}
                         >
                           {race.laps}
                         </td>
@@ -91,15 +98,15 @@ export default async function PrintLineupPage({
                       {isFirstRowOfGate && (
                         <td
                           rowSpan={gate.classEntries.length}
-                          className={`${topBorder} px-2 py-1 align-top`}
+                          className={`${topBorder} px-3 py-2 align-top`}
                         >
                           {gate.gateNumber}
                         </td>
                       )}
-                      <td className={`${topBorder} px-2 py-1`}>
+                      <td className={`${topBorder} px-3 py-2 break-words`}>
                         {entry.className}
                       </td>
-                      <td className={`${topBorder} px-2 py-1 text-right`}>
+                      <td className={`${topBorder} px-3 py-2 text-right`}>
                         {entry.numRacers}
                       </td>
                     </tr>
