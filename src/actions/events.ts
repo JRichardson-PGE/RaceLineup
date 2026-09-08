@@ -44,6 +44,7 @@ export async function createEventAction(
       eventDate: new Date(parsed.data.eventDate),
       slug: parsed.data.slug,
       promoterId: user.sub,
+      activeSchedule: "PRACTICE",
     },
   });
 

@@ -70,9 +70,18 @@ export function listAllEvents(promoterNameFilter?: string) {
   });
 }
 
-export function listEventsPublic() {
+export function listEventsPublic(search?: string) {
   return prisma.event.findMany({
+    where: search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { promoter: { name: { contains: search, mode: "insensitive" } } },
+          ],
+        }
+      : undefined,
     orderBy: { eventDate: "desc" },
+    include: { promoter: { select: { name: true } } },
   });
 }
 

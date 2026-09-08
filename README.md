@@ -22,8 +22,12 @@ logged-in user has a profile page (linked from their name in the header) to
 change their own password or attach/update a recovery email.
 
 Both the public and dashboard event lists split into "Upcoming" and "Past"
-sections by date automatically. Each event's control panel — and the public
-event page itself — has a "Print PDF" button that opens a print-ready,
+sections by date automatically, and both show the event's promoter name.
+The public list also has a search box (event name or promoter name,
+case-insensitive `contains` match) via a `?q=` query param, mirroring the
+dashboard's admin-only promoter filter (`?promoter=`). Each event's control
+panel — and the public event page itself — has a "Print PDF" button that
+opens a print-ready,
 letter-size table of the lineup (race/laps/gate/class/riders, grouped and
 bordered by race, with headers repeating on each printed page); a "Back"
 button on that page returns to wherever the visitor came from. The dashboard
@@ -48,9 +52,10 @@ file (same pattern as the race lineup upload, with its own template under
 advance/back/restart controls, run independently of the race lineup's
 position. A toggle on the event control panel controls which one the public
 page shows ("Public page is currently showing: ..."); the intended flow is
-practice first, then "Switch to race lineup" once practice wraps up. The
-public page picks up a schedule switch on its next 60s poll without a
-reload.
+practice first, then "Switch to race lineup" once practice wraps up — new
+events are created with practice as the active schedule for exactly this
+reason. The public page picks up a schedule switch on its next 60s poll
+without a reload.
 
 On the promoter's control panel, the Practice and Race sections are each a
 native `<details>` element that starts open for whichever schedule is
