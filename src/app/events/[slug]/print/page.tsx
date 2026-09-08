@@ -3,6 +3,7 @@ import { getEventBySlugPublic } from "@/lib/lineup";
 import { PrintButton } from "@/components/PrintButton";
 import { BackButton } from "@/components/BackButton";
 import { LineupPrintTable } from "@/components/LineupPrintTable";
+import { PrintQrCode } from "@/components/PrintQrCode";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,8 @@ export default async function PublicPrintLineupPage({
       </p>
 
       <LineupPrintTable races={event.races} />
+
+      <PrintQrCode path={`/events/${event.slug}`} />
     </div>
   );
 }

@@ -68,7 +68,13 @@ letter-size table of the lineup (race/laps/gate/class/riders, grouped and
 bordered by race, with headers repeating on each printed page); a "Back"
 button on that page returns to wherever the visitor came from. The dashboard
 control panel also has "Copy link" and "Show QR code" for sharing the public
-page.
+page. Every print page (dashboard and public, race and practice) also ends
+with a `PrintQrCode` — a QR code plus the plain-text URL underneath,
+pointing at the live public event page — so a printed sheet posted at the
+track still gets someone to the current, up-to-date schedule. It's a
+separate component from the dashboard's `EventQrCode` (which toggles
+on/off and is marked `no-print`): this one always renders, since the whole
+point is for it to end up on paper.
 
 On the dashboard, the lineup is its own scrollable panel below the fixed
 control buttons, auto-scrolling to the current race whenever it changes (and

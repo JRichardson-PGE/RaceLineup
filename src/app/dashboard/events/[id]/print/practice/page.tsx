@@ -4,6 +4,7 @@ import { getEventById } from "@/lib/lineup";
 import { PrintButton } from "@/components/PrintButton";
 import { BackButton } from "@/components/BackButton";
 import { PracticePrintTable } from "@/components/PracticePrintTable";
+import { PrintQrCode } from "@/components/PrintQrCode";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -38,6 +39,8 @@ export default async function PrintPracticePage({
       </p>
 
       <PracticePrintTable sessions={event.practiceSessions} />
+
+      <PrintQrCode path={`/events/${event.slug}`} />
     </div>
   );
 }
