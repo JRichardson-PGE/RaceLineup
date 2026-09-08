@@ -34,13 +34,10 @@ export function LineupFrame({
     // (viewport-relative) rather than offsetTop, since neither el nor
     // container establish a CSS positioning context for offsetTop to be
     // reliably measured against.
+    const TOP_OFFSET = 16; // matches the frame's own p-4 padding
     const containerRect = container.getBoundingClientRect();
     const elRect = el.getBoundingClientRect();
-    const delta =
-      elRect.top -
-      containerRect.top -
-      container.clientHeight / 2 +
-      el.clientHeight / 2;
+    const delta = elRect.top - containerRect.top - TOP_OFFSET;
     container.scrollTo({
       top: container.scrollTop + delta,
       behavior: "smooth",

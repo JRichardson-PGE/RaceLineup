@@ -84,7 +84,10 @@ that call scrolls the whole page too, not just the panel, dragging the
 fixed controls above it off-screen. `LineupFrame`/`PracticeFrame` instead
 compute the target offset via `getBoundingClientRect()` and call
 `container.scrollTo()` directly on the panel, so only the panel itself
-ever moves. On the public page, both the site's top nav bar
+ever moves — and it aligns the current item to the panel's top edge
+(matching its own `p-4` padding) rather than centering it, so the item
+lands in a consistent spot and doesn't hide upcoming ones below the fold.
+On the public page, both the site's top nav bar
 and the event's own header (name/location/date) are pinned in place
 (`position: sticky`, stacked one below the other — see
 `HeaderHeightObserver`, which keeps a `--site-header-height` CSS variable in
