@@ -6,13 +6,19 @@ import { MobileMenu } from "@/components/MobileMenu";
 export async function SiteHeader() {
   const session = await getSession();
 
-  const navLinks = (
+  // Kept out of the mobile dropdown and always visible — it's the page
+  // promoters actually work from, so it shouldn't take an extra tap to see.
+  const dashboardLink = session && (
+    <Link
+      href="/dashboard"
+      className="font-semibold text-gray-900 hover:text-gray-600"
+    >
+      Dashboard
+    </Link>
+  );
+
+  const otherNavLinks = (
     <>
-      {session && (
-        <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
-          Dashboard
-        </Link>
-      )}
       {session && (
         <Link
           href="/guide"
@@ -69,19 +75,23 @@ export async function SiteHeader() {
             RaceLineup
           </Link>
           <nav className="hidden flex-wrap items-center gap-4 text-sm font-medium sm:flex">
-            {navLinks}
+            {dashboardLink}
+            {otherNavLinks}
           </nav>
           <div className="hidden items-center gap-3 text-sm sm:flex">
             {accountArea}
           </div>
-          <MobileMenu>
-            <div className="flex flex-col items-start gap-3 text-sm font-medium">
-              {navLinks}
-              <div className="flex w-full flex-wrap items-center gap-3 border-t border-gray-200 pt-3 text-sm font-medium">
-                {accountArea}
+          <div className="flex items-center gap-3 text-sm sm:hidden">
+            {dashboardLink}
+            <MobileMenu>
+              <div className="flex flex-col items-start gap-3 text-sm font-medium">
+                {otherNavLinks}
+                <div className="flex w-full flex-wrap items-center gap-3 border-t border-gray-200 pt-3 text-sm font-medium">
+                  {accountArea}
+                </div>
               </div>
-            </div>
-          </MobileMenu>
+            </MobileMenu>
+          </div>
         </div>
       </div>
     </header>

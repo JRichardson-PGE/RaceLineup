@@ -109,10 +109,13 @@ combined, currently-rendered height of both sticky bars off
 time, so it stays correct however tall that stack happens to be — including
 on mobile, where the nav bar is a single short row instead of the wrapped
 multi-line desktop header. Below the `sm` breakpoint the
-top nav itself collapses to just the logo and a hamburger button
-(`MobileMenu`) — nav links and the account/sign-in area move into a dropdown
-panel instead of wrapping across two or three lines, so a sticky header
-doesn't eat a large chunk of a phone's vertical space. Because
+top nav itself collapses to just the logo, a "Dashboard" link, and a
+hamburger button (`MobileMenu`) — everything else (How to Use, Promoters,
+the account/sign-in area) moves into a dropdown panel instead of wrapping
+across two or three lines, so a sticky header doesn't eat a large chunk of
+a phone's vertical space. Dashboard stays outside the dropdown on its own
+even on mobile, unlike the other links — it's the page promoters actually
+work from, so it shouldn't cost an extra tap to find. Because
 `HeaderHeightObserver` measures the header's own box (not the dropdown,
 which is `position: absolute` and doesn't affect it), `--site-header-height`
 stays small on mobile and everything sticky below it still stacks correctly
