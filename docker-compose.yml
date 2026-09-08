@@ -15,6 +15,7 @@ services:
       retries: 10
 
   app:
+    image: ${APP_IMAGE:-racelineup-app:local}
     build: .
     restart: unless-stopped
     env_file:

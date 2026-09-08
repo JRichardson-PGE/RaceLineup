@@ -149,13 +149,26 @@ account.
 ## Deploying to an EC2 instance (Docker Compose)
 
 This ships as three containers behind nginx: `nginx` (TLS + reverse proxy) →
-`app` (Next.js) → `db` (Postgres), all defined in `docker-compose.yml`.
+`app` (Next.js) → `db` (Postgres), all defined in `docker-compose.yml`. The
+`app` service's `image:` and `build:` keys both point at the same image name,
+so `docker compose pull` (pre-built, see below) and `docker compose up
+--build` (local build) both work without editing the file — whichever one
+you run wins. The `Dockerfile`'s `runtime-deps` stage does a
+`npm ci --omit=dev` install specifically for the shipped image, separate
+from the full install `builder` uses for `next build` — that's what keeps
+eslint/Tailwind/`@types/*` (build-only weight) out of the running container.
 
 ### 1. Launch and prepare the instance
 
-- Launch an EC2 instance (Amazon Linux 2023 or Ubuntu 22.04+; a `t3.small` is
-  plenty to start). Open inbound ports **22** (SSH), **80**, and **443** in
-  its security group.
+- Launch an EC2 instance on a **Graviton (arm64)** type — `t4g.small` (2 GB)
+  is the recommended minimum and costs about 20% less than the equivalent
+  `t3.small` for the same specs. Use an arm64 AMI (Amazon Linux 2023 or
+  Ubuntu 22.04+ both publish one). Open inbound ports **22** (SSH), **80**,
+  and **443** in its security group.
+- If you've set up the [CI/ECR pipeline](#continuous-deployment-github-actions-to-ecr)
+  below, attach an IAM instance role granting `AmazonEC2ContainerRegistryReadOnly`
+  (so the instance can `docker compose pull`) — see that section for the
+  full policy if you're also doing backups from this instance.
 - Point your domain's DNS `A` record at the instance's public IP (needed for
   the TLS step below).
 - SSH in and install Docker:
@@ -167,12 +180,15 @@ This ships as three containers behind nginx: `nginx` (TLS + reverse proxy) →
   sudo usermod -aG docker $USER
   # log out and back in for the group change to apply, then:
   DOCKER_COMPOSE_VERSION=v2.32.1
-  sudo curl -SL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+  sudo curl -SL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-$(uname -m)" \
     -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
   ```
 
-  (On Ubuntu, follow [Docker's Ubuntu install guide](https://docs.docker.com/engine/install/ubuntu/) instead of `dnf`.)
+  (`$(uname -m)` picks the right binary automatically — `aarch64` on
+  Graviton, `x86_64` on Intel/AMD. On Ubuntu, follow
+  [Docker's Ubuntu install guide](https://docs.docker.com/engine/install/ubuntu/)
+  instead of `dnf`.)
 
 ### 2. Get the code onto the server and configure it
 
@@ -188,17 +204,35 @@ Edit `.env` and set real values:
 - `DATABASE_URL` — `postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@db:5432/<POSTGRES_DB>`
   (host is `db`, the Postgres service name — not `localhost`).
 - `AUTH_SECRET` — a long random string, e.g. `openssl rand -base64 48`.
+- `APP_IMAGE` — only needed if you're using the CI/ECR pipeline (see below);
+  leave unset to build the image on the instance instead.
 
 ### 3. First launch (HTTP only)
+
+The instance never has to run `next build` itself if you've set up the
+[CI/ECR pipeline](#continuous-deployment-github-actions-to-ecr) — that's the
+recommended path on a small instance, since a production build is the most
+memory-hungry thing this project ever does:
+
+```bash
+aws ecr get-login-password --region <your-region> | \
+  docker login --username AWS --password-stdin <account-id>.dkr.ecr.<your-region>.amazonaws.com
+docker compose pull
+docker compose up -d
+docker compose logs -f app   # confirm migrations applied and it's Ready
+```
+
+Without that pipeline, build locally on the instance instead (fine for a
+`t4g.small`/2 GB instance; riskier on anything smaller):
 
 ```bash
 docker compose up -d --build
 docker compose logs -f app   # confirm migrations applied and it's Ready
 ```
 
-The app container's entrypoint runs `prisma migrate deploy` automatically
-before starting, so the database schema is created on first boot. Visit
-`http://<your-domain-or-ip>/` to confirm it's up.
+Either way, the app container's entrypoint runs `prisma migrate deploy`
+automatically before starting, so the database schema is created on first
+boot. Visit `http://<your-domain-or-ip>/` to confirm it's up.
 
 Create the first admin account:
 
@@ -235,13 +269,150 @@ Renew certificates periodically (e.g. a monthly cron job running the same
 
 ### Redeploying after code changes
 
+With the CI/ECR pipeline set up, a deploy is just a pull:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Without it, rebuild on the instance as before:
+
 ```bash
 git pull
 docker compose up -d --build
 ```
 
-This rebuilds the `app` image and applies any new Prisma migrations
-automatically on startup; `db` and `nginx` are left running.
+Either way, Prisma migrations are applied automatically on startup; `db` and
+`nginx` are left running.
+
+## Continuous deployment (GitHub Actions to ECR)
+
+`.github/workflows/docker-publish.yml` builds the app image (for both
+`linux/amd64` and `linux/arm64`, so it works on Graviton) on every push to
+`master` and pushes it to a private Amazon ECR repository. This moves the
+one truly memory-hungry step — `next build` — off the EC2 instance entirely,
+which matters more for a small instance's stability than any other single
+change here. One-time setup:
+
+1. **Create the ECR repository:**
+
+   ```bash
+   aws ecr create-repository --repository-name racelineup --region <your-region>
+   ```
+
+2. **Create a GitHub OIDC identity provider** in IAM (once per AWS account,
+   skip if you already have one for other repos):
+
+   ```bash
+   aws iam create-open-id-connect-provider \
+     --url https://token.actions.githubusercontent.com \
+     --client-id-list sts.amazonaws.com \
+     --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+   ```
+
+3. **Create an IAM role** GitHub Actions can assume, trusting only this repo
+   (replace `<ACCOUNT_ID>` and `<github-username-or-org>`):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Effect": "Allow",
+       "Principal": {
+         "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+       },
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+         "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
+         "StringLike": { "token.actions.githubusercontent.com:sub": "repo:<github-username-or-org>/RaceLineup:*" }
+       }
+     }]
+   }
+   ```
+
+   Attach a permissions policy to that role scoped to just this repository
+   (push access to ECR):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       { "Effect": "Allow", "Action": "ecr:GetAuthorizationToken", "Resource": "*" },
+       {
+         "Effect": "Allow",
+         "Action": [
+           "ecr:BatchCheckLayerAvailability",
+           "ecr:GetDownloadUrlForLayer",
+           "ecr:BatchGetImage",
+           "ecr:PutImage",
+           "ecr:InitiateLayerUpload",
+           "ecr:UploadLayerPart",
+           "ecr:CompleteLayerUpload"
+         ],
+         "Resource": "arn:aws:ecr:<your-region>:<ACCOUNT_ID>:repository/racelineup"
+       }
+     ]
+   }
+   ```
+
+4. **Set repository variables** in GitHub (Settings → Secrets and variables →
+   Actions → Variables): `AWS_ROLE_ARN` (the role from step 3),
+   `AWS_REGION`, and `ECR_REPOSITORY` (`racelineup`). No long-lived AWS keys
+   are needed anywhere — OIDC issues short-lived credentials per run.
+
+5. **On the EC2 instance**, attach an IAM instance role with the
+   AWS-managed `AmazonEC2ContainerRegistryReadOnly` policy so it can pull,
+   and set `APP_IMAGE=<ACCOUNT_ID>.dkr.ecr.<your-region>.amazonaws.com/racelineup:latest`
+   in `.env`. ECR login tokens expire after 12 hours, so add a daily
+   re-login to crontab (`crontab -e`):
+
+   ```cron
+   0 3 * * * aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.<your-region>.amazonaws.com >> /home/ec2-user/ecr-login.log 2>&1
+   ```
+
+## Backups
+
+The `db` container's data only exists on the instance's EBS volume — there's
+no managed database with automated snapshots. `scripts/backup-db.sh` dumps
+the database and uploads it to S3; it's cheap enough (a few cents a month
+for a small event database) that there's no real reason to skip it.
+
+1. **Create an S3 bucket** for backups and, optionally, a lifecycle rule to
+   expire old backups (e.g. after 90 days) so storage cost doesn't grow
+   unbounded.
+2. **Add to the EC2 instance role** (the same role from step 5 above, or a
+   new one) a policy scoped to that bucket:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Effect": "Allow",
+       "Action": "s3:PutObject",
+       "Resource": "arn:aws:s3:::<your-backup-bucket>/racelineup/*"
+     }]
+   }
+   ```
+
+3. **Make the script executable and add it to crontab** (paths relative to
+   wherever you cloned the repo, e.g. `/home/ec2-user/racelineup`):
+
+   ```bash
+   chmod +x scripts/backup-db.sh
+   crontab -e
+   ```
+
+   ```cron
+   0 4 * * * BACKUP_S3_BUCKET=<your-backup-bucket> /home/ec2-user/racelineup/scripts/backup-db.sh >> /home/ec2-user/backup.log 2>&1
+   ```
+
+To restore a backup, download it and pipe it into `psql`:
+
+```bash
+aws s3 cp s3://<your-backup-bucket>/racelineup/<timestamp>.sql.gz - | \
+  gunzip | docker compose exec -T db psql -U <POSTGRES_USER> -d <POSTGRES_DB>
+```
 
 ## Known accepted risk
 

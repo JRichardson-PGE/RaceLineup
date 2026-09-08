@@ -3,12 +3,27 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Separate production-only install for the runtime image: `prisma` and `tsx`
+# are regular dependencies (needed at container startup for migrations/seed),
+# but this skips eslint/tailwindcss/@types/* and other dev-only weight that
+# `deps` above pulls in for the build step. Keeping it as its own stage (not
+# just `npm prune` on `deps`) means the builder's dev deps are never at risk
+# of leaking into the shipped image.
+FROM node:22-alpine AS runtime-deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+# Only needed so `prisma generate` (schema-only, no DB connection) can load
+# prisma.config.ts; the real value is supplied at container runtime via .env.
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+RUN npx prisma generate
+
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Only needed so `prisma generate` (schema-only, no DB connection) can load
-# prisma.config.ts; the real value is supplied at container runtime via .env.
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 RUN npx prisma generate
 RUN npm run build
@@ -18,7 +33,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=runtime-deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
