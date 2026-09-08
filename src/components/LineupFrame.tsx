@@ -6,9 +6,11 @@ import { LineupTable, type RaceData } from "@/components/LineupTable";
 export function LineupFrame({
   races,
   currentRaceId,
+  highlight = true,
 }: {
   races: RaceData[];
   currentRaceId: string | null;
+  highlight?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +32,11 @@ export function LineupFrame({
       ref={containerRef}
       className="max-h-[65vh] overflow-y-auto rounded-lg border border-gray-200 bg-white p-4"
     >
-      <LineupTable races={races} currentRaceId={currentRaceId} />
+      <LineupTable
+        races={races}
+        currentRaceId={currentRaceId}
+        highlight={highlight}
+      />
     </div>
   );
 }

@@ -9,9 +9,10 @@ export type PracticeSessionData = {
 export type PracticeTableProps = {
   sessions: PracticeSessionData[];
   currentPracticeId: string | null;
+  highlight?: boolean;
 };
 
-function formatDuration(session: PracticeSessionData) {
+export function formatDuration(session: PracticeSessionData) {
   if (session.laps !== null) return `${session.laps} laps`;
   if (session.minutes !== null) return `${session.minutes} min`;
   return "";
@@ -20,6 +21,7 @@ function formatDuration(session: PracticeSessionData) {
 export function PracticeTable({
   sessions,
   currentPracticeId,
+  highlight = true,
 }: PracticeTableProps) {
   if (sessions.length === 0) {
     return (
@@ -35,8 +37,8 @@ export function PracticeTable({
   return (
     <ol className="flex flex-col gap-3">
       {sessions.map((session) => {
-        const isCurrent = session.id === currentPracticeId;
-        const isNext = session.id === nextSessionId;
+        const isCurrent = highlight && session.id === currentPracticeId;
+        const isNext = highlight && session.id === nextSessionId;
 
         return (
           <li

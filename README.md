@@ -55,11 +55,23 @@ reload.
 On the promoter's control panel, the Practice and Race sections are each a
 native `<details>` element that starts open for whichever schedule is
 currently active and collapsed (with a "(not showing publicly)" note) for
-the other — so a busy promoter isn't scrolling past controls for the
-schedule that isn't running, but can still expand it to check something.
-The advance/back/restart buttons for the inactive schedule are disabled,
-both in the UI and (redundantly, for safety) in the Server Actions
-themselves, which no-op if the schedule they target isn't the active one.
+the other, and the active schedule's section is always rendered first (the
+inactive one moves to the bottom) — so a busy promoter isn't scrolling past
+controls for the schedule that isn't running, but can still expand it to
+check something. The advance/back/restart buttons for the inactive schedule
+are disabled, both in the UI and (redundantly, for safety) in the Server
+Actions themselves, which no-op if the schedule they target isn't the
+active one. `LineupTable`/`PracticeTable` (and their scrolling `Frame`
+wrappers) take a `highlight` prop — the inactive schedule's current/next
+race or session keeps its real position under the hood (so nothing is lost
+when a promoter switches back), but its "On Track"/"On The Line" badges are
+suppressed while it isn't the one actually running.
+
+Each section also has its own "Print PDF" button — `PracticePrintTable` is
+a flat practice-number/description/duration table, separate from the
+race lineup's grouped `LineupPrintTable` — with matching print routes under
+`print/practice`. Public visitors only ever see one Print PDF link (on the
+event page itself), which points at whichever schedule is currently active.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session

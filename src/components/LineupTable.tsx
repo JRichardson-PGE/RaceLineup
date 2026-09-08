@@ -20,9 +20,14 @@ export type RaceData = {
 export type LineupTableProps = {
   races: RaceData[];
   currentRaceId: string | null;
+  highlight?: boolean;
 };
 
-export function LineupTable({ races, currentRaceId }: LineupTableProps) {
+export function LineupTable({
+  races,
+  currentRaceId,
+  highlight = true,
+}: LineupTableProps) {
   if (races.length === 0) {
     return (
       <p className="text-sm text-gray-500">
@@ -37,8 +42,8 @@ export function LineupTable({ races, currentRaceId }: LineupTableProps) {
   return (
     <ol className="flex flex-col gap-3">
       {races.map((race) => {
-        const isCurrent = race.id === currentRaceId;
-        const isNext = race.id === nextRaceId;
+        const isCurrent = highlight && race.id === currentRaceId;
+        const isNext = highlight && race.id === nextRaceId;
 
         return (
           <li

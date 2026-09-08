@@ -9,9 +9,11 @@ import {
 export function PracticeFrame({
   sessions,
   currentPracticeId,
+  highlight = true,
 }: {
   sessions: PracticeSessionData[];
   currentPracticeId: string | null;
+  highlight?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,11 @@ export function PracticeFrame({
       ref={containerRef}
       className="max-h-[65vh] overflow-y-auto rounded-lg border border-gray-200 bg-white p-4"
     >
-      <PracticeTable sessions={sessions} currentPracticeId={currentPracticeId} />
+      <PracticeTable
+        sessions={sessions}
+        currentPracticeId={currentPracticeId}
+        highlight={highlight}
+      />
     </div>
   );
 }

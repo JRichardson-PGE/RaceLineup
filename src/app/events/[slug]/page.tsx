@@ -34,7 +34,11 @@ export default async function PublicEventPage({
               </p>
             </div>
             <Link
-              href={`/events/${slug}/print`}
+              href={
+                event.activeSchedule === "PRACTICE"
+                  ? `/events/${slug}/print/practice`
+                  : `/events/${slug}/print`
+              }
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               Print PDF
