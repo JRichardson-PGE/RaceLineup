@@ -74,7 +74,13 @@ pointing at the live public event page — so a printed sheet posted at the
 track still gets someone to the current, up-to-date schedule. It's a
 separate component from the dashboard's `EventQrCode` (which toggles
 on/off and is marked `no-print`): this one always renders, since the whole
-point is for it to end up on paper.
+point is for it to end up on paper. On iPhone/iPad, tapping "Print PDF"
+opens Safari's AirPrint sheet rather than a save dialog — there's no way to
+detect from script whether a real printer is available, so `PrintButton`
+sniffs iOS via `navigator.userAgent`/`navigator.platform` and shows a
+one-time tip below the button ("tap the preview thumbnail, then pinch
+outward to reveal Share → Save to Files") pointing at the actual (fairly
+undiscoverable) gesture iOS requires to get a PDF out of that sheet.
 
 On the dashboard, the lineup is its own scrollable panel below the fixed
 control buttons, auto-scrolling to the current race whenever it changes (and
