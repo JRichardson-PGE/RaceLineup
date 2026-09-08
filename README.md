@@ -120,11 +120,11 @@ npx prisma db seed                                # creates an initial admin log
 npm run dev
 ```
 
-Visit `http://localhost:3000`. The seed command prints the admin email and
-password it created (also configurable via `SEED_ADMIN_EMAIL` /
-`SEED_ADMIN_PASSWORD` / `SEED_ADMIN_NAME` env vars) — sign in with it, then
-create your own account under **Promoters** and consider removing the seed
-account.
+Visit `http://localhost:3000`. The seed command prints the admin username
+and password it created (also configurable via `SEED_ADMIN_USERNAME` /
+`SEED_ADMIN_PASSWORD` / `SEED_ADMIN_NAME` env vars — defaults are
+`admin` / `changeme123`) — sign in with it, then create your own account
+under **Promoters** and consider removing the seed account.
 
 `.env` (already present locally, gitignored) holds `DATABASE_URL` and
 `AUTH_SECRET` for local dev.

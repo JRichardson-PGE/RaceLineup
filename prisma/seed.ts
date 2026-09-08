@@ -7,22 +7,22 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = process.env.SEED_ADMIN_EMAIL ?? "admin@racelineup.local";
+  const username = process.env.SEED_ADMIN_USERNAME ?? "admin";
   const password = process.env.SEED_ADMIN_PASSWORD ?? "changeme123";
   const name = process.env.SEED_ADMIN_NAME ?? "Admin";
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
-    console.log(`Admin user ${email} already exists, skipping.`);
+    console.log(`Admin user ${username} already exists, skipping.`);
     return;
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
   await prisma.user.create({
-    data: { email, name, passwordHash, role: "ADMIN" },
+    data: { username, name, passwordHash, role: "ADMIN" },
   });
 
-  console.log(`Created admin user: ${email} / ${password}`);
+  console.log(`Created admin user: ${username} / ${password}`);
   console.log("Sign in and create your own account, then consider removing this one.");
 }
 
