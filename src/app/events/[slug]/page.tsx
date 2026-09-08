@@ -23,7 +23,10 @@ export default async function PublicEventPage({
   if (event) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 p-4">
-        <div className="sticky top-[var(--site-header-height)] z-10 -mx-4 bg-[var(--background)] px-4 pb-2">
+        <div
+          id="event-sticky-header"
+          className="sticky top-[var(--site-header-height)] z-10 -mx-4 bg-[var(--background)] px-4 pb-2"
+        >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">

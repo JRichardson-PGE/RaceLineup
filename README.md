@@ -99,7 +99,16 @@ and the event's own header (name/location/date) are pinned in place
 `HeaderHeightObserver`, which keeps a `--site-header-height` CSS variable in
 sync so the event header sits exactly below the nav bar regardless of its
 height) while the lineup scrolls beneath them, and auto-scrolls to the
-current race once when the page first loads. Below the `sm` breakpoint the
+current race once when the page first loads — the same top-aligned
+`getBoundingClientRect()` approach as the dashboard, not `scrollIntoView`'s
+centering, except here it scrolls the whole page (`window.scrollTo`) rather
+than a contained panel, since the public page has no scrollable panel of
+its own. The offset it aligns to isn't a fixed constant: it reads the
+combined, currently-rendered height of both sticky bars off
+`#event-sticky-header`'s own `getBoundingClientRect().bottom` at scroll
+time, so it stays correct however tall that stack happens to be — including
+on mobile, where the nav bar is a single short row instead of the wrapped
+multi-line desktop header. Below the `sm` breakpoint the
 top nav itself collapses to just the logo and a hamburger button
 (`MobileMenu`) — nav links and the account/sign-in area move into a dropdown
 panel instead of wrapping across two or three lines, so a sticky header

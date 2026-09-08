@@ -44,10 +44,23 @@ export function PublicSchedule({
         ? initialCurrentPracticeId
         : initialCurrentRaceId;
     if (!targetId) return;
-    const el = containerRef.current?.querySelector(
+    const el = containerRef.current?.querySelector<HTMLElement>(
       `[data-race-id="${targetId}"]`
     );
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!el) return;
+
+    // Align to just below the stacked sticky headers (site nav + event
+    // title bar), not scrollIntoView's centering — matches the dashboard's
+    // LineupFrame/PracticeFrame behavior. There's no single container to
+    // scroll here (the whole page scrolls), so this measures the sticky
+    // header's live bottom edge — which, at page-load scroll position,
+    // equals its combined height — rather than assuming a fixed offset.
+    const TOP_PADDING = 8;
+    const stickyHeader = document.getElementById("event-sticky-header");
+    const headerOffset = stickyHeader?.getBoundingClientRect().bottom ?? 0;
+    const elRect = el.getBoundingClientRect();
+    const delta = elRect.top - headerOffset - TOP_PADDING;
+    window.scrollTo({ top: window.scrollY + delta, behavior: "smooth" });
   }, [initialActiveSchedule, initialCurrentPracticeId, initialCurrentRaceId]);
 
   useEffect(() => {
