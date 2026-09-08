@@ -15,7 +15,10 @@ export async function GET(
   }
 
   return NextResponse.json({
+    activeSchedule: event.activeSchedule,
     currentRaceId: event.currentRaceId,
     races: event.races,
+    currentPracticeId: event.currentPracticeId,
+    practiceSessions: event.practiceSessions,
   });
 }

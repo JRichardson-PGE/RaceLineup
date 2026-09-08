@@ -11,6 +11,11 @@ enum Role {
   PROMOTER
 }
 
+enum ScheduleType {
+  PRACTICE
+  RACE
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String?  @unique
@@ -37,10 +42,16 @@ model Event {
   promoterId String
   promoter   User   @relation(fields: [promoterId], references: [id], onDelete: Cascade)
 
-  races Race[]
+  activeSchedule ScheduleType @default(RACE)
+
+  races            Race[]
+  practiceSessions PracticeSession[]
 
   currentRaceId String? @unique
   currentRace   Race?   @relation("CurrentRace", fields: [currentRaceId], references: [id], onDelete: SetNull)
+
+  currentPracticeId String?          @unique
+  currentPractice   PracticeSession? @relation("CurrentPractice", fields: [currentPracticeId], references: [id], onDelete: SetNull)
 }
 
 model Race {
@@ -55,6 +66,22 @@ model Race {
   gateDrops GateDrop[]
 
   currentForEvent Event? @relation("CurrentRace")
+
+  @@unique([eventId, position])
+}
+
+model PracticeSession {
+  id             String @id @default(cuid())
+  practiceNumber Int
+  description    String
+  laps           Int?
+  minutes        Int?
+  position       Int
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  currentForEvent Event? @relation("CurrentPractice")
 
   @@unique([eventId, position])
 }

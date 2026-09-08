@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEventBySlugPublic, getEventBySlugSummary } from "@/lib/lineup";
-import { PublicLineup } from "@/components/PublicLineup";
+import { PublicSchedule } from "@/components/PublicSchedule";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +41,13 @@ export default async function PublicEventPage({
             </Link>
           </div>
         </div>
-        <PublicLineup
+        <PublicSchedule
           slug={slug}
+          initialActiveSchedule={event.activeSchedule}
           initialRaces={event.races}
           initialCurrentRaceId={event.currentRaceId}
+          initialPracticeSessions={event.practiceSessions}
+          initialCurrentPracticeId={event.currentPracticeId}
         />
       </main>
     );

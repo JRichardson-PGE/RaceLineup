@@ -78,7 +78,7 @@ export async function deleteUserAction(formData: FormData) {
       // and races) doesn't hit both sides of that circular reference at once.
       prisma.event.updateMany({
         where: { promoterId: userId },
-        data: { currentRaceId: null },
+        data: { currentRaceId: null, currentPracticeId: null },
       }),
       prisma.user.delete({ where: { id: userId } }),
     ]);

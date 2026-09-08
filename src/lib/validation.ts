@@ -97,6 +97,35 @@ export const lineupSchema = z.object({
   races: z.array(raceSchema),
 });
 
+export const practiceSessionSchema = z
+  .object({
+    practiceNumber: z.coerce.number().int().min(1, "Must be at least 1"),
+    description: z.string().trim().min(1, "Description is required"),
+    durationType: z.enum(["laps", "minutes"]),
+    laps: z.coerce.number().int().min(1, "Must be at least 1").optional(),
+    minutes: z.coerce.number().int().min(1, "Must be at least 1").optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.durationType === "laps" && !data.laps) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["laps"],
+        message: "Enter a number of laps",
+      });
+    }
+    if (data.durationType === "minutes" && !data.minutes) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["minutes"],
+        message: "Enter a number of minutes",
+      });
+    }
+  });
+
+export const practiceScheduleSchema = z.object({
+  sessions: z.array(practiceSessionSchema),
+});
+
 export function slugify(input: string): string {
   return input
     .trim()

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { z } from "zod";
 import type { lineupSchema } from "@/lib/validation";
 
-const lineupInclude = {
+const eventScheduleInclude = {
   races: {
     orderBy: { position: "asc" as const },
     include: {
@@ -14,6 +14,9 @@ const lineupInclude = {
       },
     },
   },
+  practiceSessions: {
+    orderBy: { position: "asc" as const },
+  },
 };
 
 export type EventWithLineup = NonNullable<
@@ -23,14 +26,14 @@ export type EventWithLineup = NonNullable<
 export function getEventById(id: string) {
   return prisma.event.findUnique({
     where: { id },
-    include: lineupInclude,
+    include: eventScheduleInclude,
   });
 }
 
 export function getEventBySlugPublic(slug: string) {
   return prisma.event.findFirst({
     where: { slug, published: true },
-    include: lineupInclude,
+    include: eventScheduleInclude,
   });
 }
 

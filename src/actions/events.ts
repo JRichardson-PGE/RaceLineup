@@ -113,7 +113,7 @@ export async function deleteEventAction(formData: FormData) {
   await prisma.$transaction([
     prisma.event.update({
       where: { id: event.id },
-      data: { currentRaceId: null },
+      data: { currentRaceId: null, currentPracticeId: null },
     }),
     prisma.event.delete({ where: { id: event.id } }),
   ]);

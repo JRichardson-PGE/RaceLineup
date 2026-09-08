@@ -40,6 +40,15 @@ sync so the event header sits exactly below the nav bar regardless of its
 height) while the lineup scrolls beneath them, and auto-scrolls to the
 current race once when the page first loads.
 
+Promoters can also set up a **practice schedule** — separate from the race
+lineup — as a flat list of sessions (practice number, description, and a
+duration of either laps or minutes). It has its own advance/back/restart
+controls, run independently of the race lineup's position. A toggle on the
+event control panel controls which one the public page shows ("Public page
+is currently showing: ..."); the intended flow is practice first, then
+"Switch to race lineup" once practice wraps up. The public page picks up a
+schedule switch on its next 60s poll without a reload.
+
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
 cookie, bcrypt) · Docker Compose (app + Postgres + nginx) for deployment.
@@ -89,10 +98,20 @@ account.
 - `src/actions` — Server Actions (mutations); `src/lib` — data access,
   session/auth, validation.
 - `prisma/schema.prisma` — data model (`User`, `Event`, `Race`, `GateDrop`,
-  `ClassEntry`). `laps` lives on `Race` since all of a race's gate drops run
-  the same distance. `User.email` and `User.username` are both optional but
-  at least one must be set (enforced in `createPromoterSchema`, not the DB).
-  `Event.eventDate` is a date only (`@db.Date`), no time of day.
+  `ClassEntry`, `PracticeSession`). `laps` lives on `Race` since all of a
+  race's gate drops run the same distance. `User.email` and `User.username`
+  are both optional but at least one must be set (enforced in
+  `createPromoterSchema`, not the DB). `Event.eventDate` is a date only
+  (`@db.Date`), no time of day. `Event.activeSchedule` (`PRACTICE` | `RACE`,
+  default `RACE`) picks which schedule the public page shows;
+  `PracticeSession.laps`/`minutes` are both nullable and exactly one is set
+  per session (enforced in `practiceSessionSchema`, not the DB).
+- `src/lib/practice.ts` / `src/actions/practice.ts` mirror `lineup.ts` /
+  `actions/lineup.ts` for the practice schedule (advance/back/restart,
+  replacing the schedule, switching `activeSchedule`).
+  `src/components/PublicSchedule.tsx` is the single public-facing component
+  that renders whichever schedule is active and swaps on the next poll if a
+  promoter switches it mid-visit.
 
 ## Deploying to an EC2 instance (Docker Compose)
 
