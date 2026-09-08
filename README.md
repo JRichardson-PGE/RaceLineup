@@ -153,7 +153,12 @@ under **Promoters** and consider removing the seed account.
   holds the downloadable templates promoters fill out; regenerate the
   `.xlsx` ones with `npm run generate:template` / `generate:practice-template`
   after changing their columns (the `.csv` ones are plain text, edit
-  directly).
+  directly). `src/lib/schedule-export.ts` is the inverse — it builds the
+  same column layout back out of the event's current races/practice
+  sessions, so a downloaded file round-trips through the uploader
+  unchanged. The "Edit lineup"/"Edit practice" pages expose it via
+  `dashboard/events/[id]/lineup/export` and `.../practice/export` (auth-
+  gated the same way as the page itself, `?format=xlsx` or `?format=csv`).
 - `src/actions` — Server Actions (mutations); `src/lib` — data access,
   session/auth, validation.
 - `prisma/schema.prisma` — data model (`User`, `Event`, `Race`, `GateDrop`,

@@ -37,6 +37,22 @@ export function PracticeScheduleUploadForm({ eventId }: { eventId: string }) {
           Download CSV template
         </a>
       </div>
+      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+        Download current schedule:
+        <a
+          href={`/dashboard/events/${eventId}/practice/export?format=xlsx`}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          Excel
+        </a>
+        &middot;
+        <a
+          href={`/dashboard/events/${eventId}/practice/export?format=csv`}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          CSV
+        </a>
+      </div>
       <form
         action={formAction}
         className="mt-3 flex flex-wrap items-center gap-3"
