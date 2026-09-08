@@ -5,6 +5,19 @@ import {
   listEventsForPromoter,
   partitionEventsByDate,
 } from "@/lib/lineup";
+import { ExpandableEventList } from "@/components/ExpandableEventList";
+
+const RECENT_PAST_DAYS = 30;
+
+function isWithinPastDays(eventDate: Date, days: number): boolean {
+  const now = new Date();
+  const todayUtc = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  return eventDate.getTime() >= todayUtc - days * 24 * 60 * 60 * 1000;
+}
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -81,6 +94,14 @@ export default async function DashboardPage({
 
   const { upcoming, past } = partitionEventsByDate(events);
 
+  // Admins already have the promoter-name filter to narrow things down;
+  // this recent-past default is specifically for a promoter's own list,
+  // which otherwise accumulates every event they've ever run.
+  const recentPast =
+    user.role === "ADMIN"
+      ? past
+      : past.filter((event) => isWithinPastDays(event.eventDate, RECENT_PAST_DAYS));
+
   return (
     <>
       <div className="flex items-center justify-between gap-2">
@@ -144,11 +165,29 @@ export default async function DashboardPage({
               <h2 className="text-lg font-bold text-gray-900">
                 Past Events
               </h2>
-              <ul className="flex flex-col gap-3">
-                {past.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </ul>
+              <ExpandableEventList
+                hiddenCount={past.length - recentPast.length}
+                visible={
+                  recentPast.length > 0 ? (
+                    <ul className="flex flex-col gap-3">
+                      {recentPast.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No events in the last {RECENT_PAST_DAYS} days.
+                    </p>
+                  )
+                }
+                hidden={
+                  <ul className="flex flex-col gap-3">
+                    {past.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </ul>
+                }
+              />
             </div>
           )}
         </>

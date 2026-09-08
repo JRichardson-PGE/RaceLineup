@@ -3,6 +3,7 @@ import { requireEventAccess, requireUser } from "@/lib/auth";
 import { getEventById, isPastAutoCompleteWindow } from "@/lib/lineup";
 import {
   completeEventAction,
+  deleteEventAction,
   togglePublishAction,
   uncompleteEventAction,
 } from "@/actions/events";
@@ -246,17 +247,7 @@ export default async function EventControlPage({
               {event.published ? "Unpublish" : "Publish"}
             </button>
           </form>
-          {!event.completed ? (
-            <form action={completeEventAction}>
-              <input type="hidden" name="eventId" value={event.id} />
-              <ConfirmSubmitButton
-                confirmMessage="Mark this event complete? It will disappear from the public event list and its page will show 'This event has concluded.'"
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
-                Mark event complete
-              </ConfirmSubmitButton>
-            </form>
-          ) : (
+          {event.completed ? (
             <form action={uncompleteEventAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <ConfirmSubmitButton
@@ -272,6 +263,18 @@ export default async function EventControlPage({
                 Uncomplete event
               </ConfirmSubmitButton>
             </form>
+          ) : (
+            event.published && (
+              <form action={completeEventAction}>
+                <input type="hidden" name="eventId" value={event.id} />
+                <ConfirmSubmitButton
+                  confirmMessage="Mark this event complete? It will disappear from the public event list and its page will show 'This event has concluded.'"
+                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Mark event complete
+                </ConfirmSubmitButton>
+              </form>
+            )
           )}
         </div>
       </div>
@@ -338,6 +341,23 @@ export default async function EventControlPage({
           {practiceSection}
         </>
       )}
+
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <h2 className="text-sm font-semibold text-red-800">Danger zone</h2>
+        <p className="mt-1 text-sm text-red-700">
+          Deleting an event permanently removes its full lineup. This cannot
+          be undone.
+        </p>
+        <form action={deleteEventAction} className="mt-2">
+          <input type="hidden" name="eventId" value={event.id} />
+          <ConfirmSubmitButton
+            confirmMessage={`Delete "${event.name}"? This permanently removes its full lineup, practice schedule, and live position. This cannot be undone.`}
+            className="rounded-md border border-red-400 px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-100"
+          >
+            Delete event
+          </ConfirmSubmitButton>
+        </form>
+      </div>
     </>
   );
 }
