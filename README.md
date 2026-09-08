@@ -99,7 +99,18 @@ and the event's own header (name/location/date) are pinned in place
 `HeaderHeightObserver`, which keeps a `--site-header-height` CSS variable in
 sync so the event header sits exactly below the nav bar regardless of its
 height) while the lineup scrolls beneath them, and auto-scrolls to the
-current race once when the page first loads.
+current race once when the page first loads. Below the `sm` breakpoint the
+top nav itself collapses to just the logo and a hamburger button
+(`MobileMenu`) — nav links and the account/sign-in area move into a dropdown
+panel instead of wrapping across two or three lines, so a sticky header
+doesn't eat a large chunk of a phone's vertical space. Because
+`HeaderHeightObserver` measures the header's own box (not the dropdown,
+which is `position: absolute` and doesn't affect it), `--site-header-height`
+stays small on mobile and everything sticky below it still stacks correctly
+whether the menu is open or not. The dropdown has no client-side router
+listener to detect navigation; instead it closes itself by listening for
+any click on a link or button inside the panel, which covers both `Link`
+navigation and the sign-out submit button.
 
 Promoters can also set up a **practice schedule** — separate from the race
 lineup — as a flat list of sessions (practice number, description, and a
