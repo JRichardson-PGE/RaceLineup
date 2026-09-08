@@ -54,10 +54,7 @@ export function PracticeTable({
           >
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-semibold text-gray-900">
-                Practice #{session.practiceNumber}{" "}
-                <span className="font-normal text-gray-500">
-                  &middot; {formatDuration(session)}
-                </span>
+                Practice #{session.practiceNumber} &mdash; {session.description}
               </h3>
               {isCurrent && (
                 <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
@@ -70,7 +67,7 @@ export function PracticeTable({
                 </span>
               )}
             </div>
-            <p className="mt-1 text-sm text-gray-700">{session.description}</p>
+            <p className="mt-1 text-sm text-gray-500">{formatDuration(session)}</p>
           </li>
         );
       })}
