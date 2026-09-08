@@ -1,0 +1,358 @@
+/* Scoped to .guide so it can't leak into or collide with the rest of the
+   app, which is otherwise all Tailwind. Every selector below is either
+   `.guide` itself or prefixed with it. */
+
+.guide {
+  --guide-paper: #F7F5EF;
+  --guide-paper-raised: #FFFDF8;
+  --guide-ink: #211C17;
+  --guide-ink-dim: #5B5348;
+  --guide-ink-faint: #8C8375;
+  --guide-line: #E3DECE;
+  --guide-line-strong: #CFC7B0;
+  --guide-amber: #B8690A;
+  --guide-amber-ink: #7A4406;
+  --guide-amber-bg: #FBEBD5;
+  --guide-green: #2C7A4B;
+  --guide-green-ink: #1E5636;
+  --guide-green-bg: #E1F1E7;
+  --guide-rust: #9C3B28;
+  --guide-rust-bg: #F7E4DF;
+  --guide-focus: #2C6E7A;
+  --guide-shadow: 0 1px 2px rgba(33,28,23,0.06), 0 8px 24px -12px rgba(33,28,23,0.18);
+
+  --guide-display: var(--font-guide-display), "Arial Narrow", sans-serif;
+  --guide-body: var(--font-guide-body), Georgia, "Times New Roman", serif;
+  --guide-mono: var(--font-guide-mono), "Courier New", monospace;
+
+  display: block;
+  background: var(--guide-paper);
+  color: var(--guide-ink);
+  font-family: var(--guide-body);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .guide {
+    --guide-paper: #17130F;
+    --guide-paper-raised: #1E1A14;
+    --guide-ink: #F2EEE3;
+    --guide-ink-dim: #BDB4A2;
+    --guide-ink-faint: #867C6A;
+    --guide-line: #3A332A;
+    --guide-line-strong: #4C4335;
+    --guide-amber: #E3922B;
+    --guide-amber-ink: #F6D9A8;
+    --guide-amber-bg: #3B2A11;
+    --guide-green: #4CAE7B;
+    --guide-green-ink: #BFE8D2;
+    --guide-green-bg: #163826;
+    --guide-rust: #E07659;
+    --guide-rust-bg: #3D1D15;
+    --guide-focus: #6FC2CF;
+    --guide-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+  }
+}
+
+.guide * { box-sizing: border-box; }
+html:has(.guide) { scroll-behavior: smooth; }
+.guide h1, .guide h2, .guide h3, .guide .display {
+  font-family: var(--guide-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  color: var(--guide-ink);
+}
+.guide code, .guide .kbd, .guide .mono, .guide table.ref, .guide .toc-num {
+  font-family: var(--guide-mono);
+}
+.guide a { color: var(--guide-focus); }
+.guide a:focus-visible, .guide button:focus-visible, .guide summary:focus-visible {
+  outline: 2px solid var(--guide-focus);
+  outline-offset: 2px;
+}
+
+.guide .shell {
+  display: grid;
+  grid-template-columns: 15.5rem minmax(0, 1fr);
+  gap: 0;
+  max-width: 76rem;
+  margin: 0 auto;
+}
+
+/* ---------- Sidebar ---------- */
+.guide .toc {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 2rem 1.25rem 2rem 1.75rem;
+  border-right: 1px solid var(--guide-line);
+}
+.guide .toc-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+.guide .toc-brand .flag { font-size: 1.1rem; }
+.guide .toc-brand span {
+  font-family: var(--guide-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.guide .toc nav { display: flex; flex-direction: column; gap: 0.15rem; }
+.guide .toc a {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  text-decoration: none;
+  color: var(--guide-ink-dim);
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.92rem;
+}
+.guide .toc a .toc-num {
+  color: var(--guide-ink-faint);
+  font-size: 0.75rem;
+  min-width: 1.3em;
+}
+.guide .toc a:hover { color: var(--guide-ink); background: var(--guide-paper-raised); }
+.guide .toc a.active {
+  color: var(--guide-ink);
+  background: var(--guide-paper-raised);
+  box-shadow: inset 3px 0 0 var(--guide-amber);
+}
+.guide .toc a.active .toc-num { color: var(--guide-amber); }
+.guide .toc-foot {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--guide-line);
+  font-size: 0.78rem;
+  color: var(--guide-ink-faint);
+  line-height: 1.5;
+}
+
+.guide details.toc-mobile { display: none; }
+
+/* ---------- Main column ---------- */
+.guide main { padding: 3rem 3rem 6rem 3rem; min-width: 0; }
+.guide .prose { max-width: 42rem; }
+
+.guide .intro { margin-bottom: 3rem; }
+.guide .eyebrow {
+  font-family: var(--guide-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--guide-amber-ink);
+  background: var(--guide-amber-bg);
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+}
+.guide .intro h1 { font-size: 2.75rem; line-height: 1.05; margin: 0 0 0.75rem; }
+.guide .intro .lede {
+  max-width: 42rem;
+  font-size: 1.15rem;
+  color: var(--guide-ink-dim);
+  margin: 0;
+}
+
+.guide .phases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--guide-line);
+  border: 1px solid var(--guide-line);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 2rem;
+  max-width: 42rem;
+}
+.guide .phase {
+  background: var(--guide-paper-raised);
+  padding: 1rem 1.1rem;
+}
+.guide .phase .num {
+  font-family: var(--guide-mono);
+  font-size: 0.75rem;
+  color: var(--guide-ink-faint);
+}
+.guide .phase h3 { font-size: 1.05rem; margin: 0.2rem 0 0.3rem; }
+.guide .phase p { margin: 0; font-size: 0.88rem; color: var(--guide-ink-dim); }
+
+.guide section.chapter { padding-top: 3.5rem; scroll-margin-top: 1.5rem; }
+.guide section.chapter:first-of-type { padding-top: 0.5rem; }
+
+.guide .chapter-head { display: flex; align-items: baseline; gap: 0.85rem; margin-bottom: 0.35rem; }
+.guide .chapter-head .n {
+  font-family: var(--guide-mono);
+  font-size: 1rem;
+  color: var(--guide-ink-faint);
+}
+.guide .chapter-head h2 { font-size: 1.85rem; margin: 0; }
+.guide .chapter-kicker {
+  color: var(--guide-ink-faint);
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
+  max-width: 42rem;
+}
+
+.guide .gate {
+  display: flex;
+  gap: 0.4rem;
+  margin: 2.75rem 0 1.75rem;
+}
+.guide .gate span {
+  width: 0.55rem; height: 0.55rem; border-radius: 50%;
+  background: var(--guide-rust);
+  opacity: 0.55;
+}
+.guide .gate span:nth-child(2) { background: var(--guide-amber); opacity: 0.75; }
+.guide .gate span:nth-child(3) { background: var(--guide-green); }
+
+.guide h3.sub { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+.guide .prose p { margin: 0 0 1rem; max-width: 42rem; }
+.guide .prose ul, .guide .prose ol { margin: 0 0 1.1rem; padding-left: 1.3rem; max-width: 42rem; }
+.guide .prose li { margin-bottom: 0.4rem; }
+.guide .prose strong { font-weight: 700; }
+
+.guide .btn {
+  font-family: var(--guide-mono);
+  font-size: 0.82rem;
+  background: var(--guide-paper-raised);
+  border: 1px solid var(--guide-line-strong);
+  border-radius: 4px;
+  padding: 0.12rem 0.5rem;
+  white-space: nowrap;
+}
+.guide .btn.primary { background: var(--guide-ink); color: var(--guide-paper); border-color: var(--guide-ink); }
+.guide .btn.danger { background: var(--guide-rust-bg); color: var(--guide-rust); border-color: var(--guide-rust); }
+
+.guide .badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--guide-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+.guide .badge.track { background: var(--guide-green); color: #fff; }
+.guide .badge.line { background: var(--guide-amber); color: #fff; }
+.guide .badge.done { background: var(--guide-focus); color: #fff; }
+.guide .badge.draft { background: var(--guide-line); color: var(--guide-ink-dim); }
+.guide .badge.pub { background: var(--guide-green-bg); color: var(--guide-green-ink); }
+
+.guide .callout {
+  max-width: 42rem;
+  border: 1px solid var(--guide-line-strong);
+  background: var(--guide-paper-raised);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.94rem;
+  box-shadow: var(--guide-shadow);
+}
+.guide .callout.tip { border-left: 3px solid var(--guide-green); }
+.guide .callout.warn { border-left: 3px solid var(--guide-amber); }
+.guide .callout p:last-child { margin-bottom: 0; }
+.guide .callout .label {
+  font-family: var(--guide-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.guide .callout.tip .label { color: var(--guide-green-ink); }
+.guide .callout.warn .label { color: var(--guide-amber-ink); }
+
+.guide .mock {
+  max-width: 42rem;
+  border: 1px solid var(--guide-line-strong);
+  border-radius: 8px;
+  background: var(--guide-paper-raised);
+  box-shadow: var(--guide-shadow);
+  padding: 1rem 1.2rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+.guide .mock .mock-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.guide .mock .mock-row:last-child { margin-bottom: 0; }
+.guide .mock .mock-title { font-family: var(--guide-display); font-weight: 700; font-size: 1.05rem; margin-right: auto; }
+.guide .mock .mock-sub { color: var(--guide-ink-faint); font-size: 0.82rem; width: 100%; margin-top: -0.3rem; }
+.guide .mock hr { border: none; border-top: 1px dashed var(--guide-line-strong); margin: 0.7rem 0; }
+
+.guide table.ref {
+  width: 100%;
+  max-width: 42rem;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 0 0 2rem;
+}
+.guide table.ref th, .guide table.ref td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--guide-line);
+  vertical-align: top;
+}
+.guide table.ref thead th {
+  font-family: var(--guide-body);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--guide-ink-faint);
+  border-bottom: 1px solid var(--guide-line-strong);
+}
+.guide table.ref td.who { color: var(--guide-ink-faint); white-space: nowrap; }
+
+.guide .table-wrap { overflow-x: auto; }
+
+.guide footer.page {
+  max-width: 42rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--guide-line);
+  color: var(--guide-ink-faint);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 860px) {
+  .guide .shell { display: block; }
+  .guide .toc { display: none; }
+  .guide details.toc-mobile {
+    display: block;
+    position: sticky; top: 0; z-index: 5;
+    background: var(--guide-paper);
+    border-bottom: 1px solid var(--guide-line);
+    padding: 0.85rem 1.25rem;
+  }
+  .guide details.toc-mobile summary {
+    font-family: var(--guide-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .guide details.toc-mobile nav { display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.75rem; }
+  .guide details.toc-mobile a {
+    text-decoration: none; color: var(--guide-ink-dim); font-size: 0.9rem;
+    padding: 0.35rem 0.2rem; display: flex; gap: 0.5rem;
+  }
+  .guide details.toc-mobile a .toc-num { font-family: var(--guide-mono); color: var(--guide-ink-faint); font-size: 0.75rem; }
+  .guide main { padding: 2rem 1.25rem 4rem; }
+  .guide .intro h1 { font-size: 2.1rem; }
+  .guide .phases { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.guide) { scroll-behavior: auto; }
+}

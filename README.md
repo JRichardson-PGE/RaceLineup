@@ -41,9 +41,16 @@ delete accounts (which deletes that promoter's events too), reset any
 account's password, and filter the all-events view by promoter name. Every
 logged-in user has a profile page (linked from their name in the header) to
 change their own password or attach/update a recovery email. Logged-in
-users also see a **How to Use** link in the header pointing to the
-Promoter Playbook (`PROMOTER_PLAYBOOK_URL` in `SiteHeader.tsx`) — a
-step-by-step guide covering the full promoter workflow.
+users also see a **How to Use** link in the header pointing to `/guide` —
+a self-contained, step-by-step promoter playbook covering the whole
+workflow (create event, build schedule, run it live, share, wrap up),
+served from the app itself rather than an external doc. It's public (no
+login required to view it directly), just not linked from the header
+until you're signed in. Its styling is entirely scoped under one `.guide`
+wrapper class in `src/app/guide/guide.css` — deliberately not Tailwind,
+so it can have its own distinct look (condensed display face, serif body,
+warm parchment/gate-light palette with dark-mode support) without
+touching or being touched by the rest of the app's styles.
 
 Both the public and dashboard event lists split into "Upcoming" and "Past"
 sections by date automatically, and both show the event's promoter name. On

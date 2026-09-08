@@ -2,10 +2,6 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { logoutAction } from "@/actions/auth";
 
-// The Promoter Playbook — how-to guide published as a Claude artifact.
-const PROMOTER_PLAYBOOK_URL =
-  "https://claude.ai/code/artifact/ce23078d-0592-4b55-b5a7-6b2878ff8167";
-
 export async function SiteHeader() {
   const session = await getSession();
 
@@ -25,14 +21,12 @@ export async function SiteHeader() {
             </Link>
           )}
           {session && (
-            <a
-              href={PROMOTER_PLAYBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/guide"
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               How to Use
-            </a>
+            </Link>
           )}
           {session?.role === "ADMIN" && (
             <Link
