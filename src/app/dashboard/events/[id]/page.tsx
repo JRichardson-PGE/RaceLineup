@@ -39,20 +39,25 @@ export default async function EventControlPage({
 
   if (!event) return null;
 
+  const isRaceActive = event.activeSchedule === "RACE";
+  const isPracticeActive = event.activeSchedule === "PRACTICE";
+  const hasPractice = event.practiceSessions.length > 0;
+
   const currentRaceIndex = event.races.findIndex(
     (r) => r.id === event.currentRaceId
   );
   const canAdvanceRace =
-    event.races.length > 0 && currentRaceIndex + 1 < event.races.length;
+    isRaceActive &&
+    event.races.length > 0 &&
+    currentRaceIndex + 1 < event.races.length;
 
   const currentPracticeIndex = event.practiceSessions.findIndex(
     (p) => p.id === event.currentPracticeId
   );
   const canAdvancePractice =
-    event.practiceSessions.length > 0 &&
+    isPracticeActive &&
+    hasPractice &&
     currentPracticeIndex + 1 < event.practiceSessions.length;
-
-  const hasPractice = event.practiceSessions.length > 0;
 
   return (
     <>
@@ -133,12 +138,10 @@ export default async function EventControlPage({
           <p className="text-sm text-gray-700">
             Public page is currently showing:{" "}
             <span className="font-semibold">
-              {event.activeSchedule === "PRACTICE"
-                ? "Practice schedule"
-                : "Race lineup"}
+              {isPracticeActive ? "Practice schedule" : "Race lineup"}
             </span>
           </p>
-          {event.activeSchedule === "PRACTICE" ? (
+          {isPracticeActive ? (
             <form action={switchToRaceAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <button
@@ -162,90 +165,116 @@ export default async function EventControlPage({
         </div>
       )}
 
-      <h2 className="text-lg font-bold text-gray-900">Practice</h2>
       {hasPractice ? (
+        <details open={isPracticeActive}>
+          <summary className="cursor-pointer text-lg font-bold text-gray-900">
+            Practice
+            {!isPracticeActive && (
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                (not showing publicly)
+              </span>
+            )}
+          </summary>
+          <div className="mt-2 flex flex-col gap-4">
+            <div className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4">
+              <form action={moveBackPracticeAction}>
+                <input type="hidden" name="eventId" value={event.id} />
+                <button
+                  type="submit"
+                  disabled={!isPracticeActive}
+                  className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+                >
+                  &larr; Move back
+                </button>
+              </form>
+              <form action={advancePracticeAction}>
+                <input type="hidden" name="eventId" value={event.id} />
+                <button
+                  type="submit"
+                  disabled={!canAdvancePractice}
+                  className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
+                >
+                  Advance &rarr;
+                </button>
+              </form>
+              <form action={restartPracticeAction}>
+                <input type="hidden" name="eventId" value={event.id} />
+                <ConfirmSubmitButton
+                  confirmMessage="Restart the practice schedule? This clears the current session and starts back at the beginning."
+                  disabled={!isPracticeActive}
+                  className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+                >
+                  Restart practice
+                </ConfirmSubmitButton>
+              </form>
+            </div>
+            <PracticeFrame
+              sessions={event.practiceSessions}
+              currentPracticeId={event.currentPracticeId}
+            />
+          </div>
+        </details>
+      ) : (
         <>
+          <h2 className="text-lg font-bold text-gray-900">Practice</h2>
+          <p className="text-sm text-gray-500">
+            No practice schedule yet.{" "}
+            <Link
+              href={`/dashboard/events/${event.id}/practice`}
+              className="text-blue-600 hover:underline"
+            >
+              Add one
+            </Link>{" "}
+            to run practice before the race.
+          </p>
+        </>
+      )}
+
+      <details open={isRaceActive}>
+        <summary className="cursor-pointer text-lg font-bold text-gray-900">
+          Race
+          {!isRaceActive && (
+            <span className="ml-2 text-sm font-normal text-gray-400">
+              (not showing publicly)
+            </span>
+          )}
+        </summary>
+        <div className="mt-2 flex flex-col gap-4">
           <div className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4">
-            <form action={moveBackPracticeAction}>
+            <form action={moveBackRaceAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <button
                 type="submit"
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                disabled={!isRaceActive}
+                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 &larr; Move back
               </button>
             </form>
-            <form action={advancePracticeAction}>
+            <form action={advanceRaceAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <button
                 type="submit"
-                disabled={!canAdvancePractice}
+                disabled={!canAdvanceRace}
                 className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
               >
                 Advance &rarr;
               </button>
             </form>
-            <form action={restartPracticeAction}>
+            <form action={restartLineupAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <ConfirmSubmitButton
-                confirmMessage="Restart the practice schedule? This clears the current session and starts back at the beginning."
-                className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                confirmMessage="Restart the lineup? This clears the current race and starts back at the beginning."
+                disabled={!isRaceActive}
+                className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
               >
-                Restart practice
+                Restart lineup
               </ConfirmSubmitButton>
             </form>
           </div>
-          <PracticeFrame
-            sessions={event.practiceSessions}
-            currentPracticeId={event.currentPracticeId}
-          />
-        </>
-      ) : (
-        <p className="text-sm text-gray-500">
-          No practice schedule yet.{" "}
-          <Link
-            href={`/dashboard/events/${event.id}/practice`}
-            className="text-blue-600 hover:underline"
-          >
-            Add one
-          </Link>{" "}
-          to run practice before the race.
-        </p>
-      )}
-
-      <h2 className="mt-2 text-lg font-bold text-gray-900">Race</h2>
-      <div className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4">
-        <form action={moveBackRaceAction}>
-          <input type="hidden" name="eventId" value={event.id} />
-          <button
-            type="submit"
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
-          >
-            &larr; Move back
-          </button>
-        </form>
-        <form action={advanceRaceAction}>
-          <input type="hidden" name="eventId" value={event.id} />
-          <button
-            type="submit"
-            disabled={!canAdvanceRace}
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
-          >
-            Advance &rarr;
-          </button>
-        </form>
-        <form action={restartLineupAction}>
-          <input type="hidden" name="eventId" value={event.id} />
-          <ConfirmSubmitButton
-            confirmMessage="Restart the lineup? This clears the current race and starts back at the beginning."
-            className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
-          >
-            Restart lineup
-          </ConfirmSubmitButton>
-        </form>
-      </div>
-
-      <LineupFrame races={event.races} currentRaceId={event.currentRaceId} />
+          <LineupFrame races={event.races} currentRaceId={event.currentRaceId} />
+        </div>
+      </details>
     </>
   );
 }

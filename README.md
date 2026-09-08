@@ -42,12 +42,24 @@ current race once when the page first loads.
 
 Promoters can also set up a **practice schedule** — separate from the race
 lineup — as a flat list of sessions (practice number, description, and a
-duration of either laps or minutes). It has its own advance/back/restart
-controls, run independently of the race lineup's position. A toggle on the
-event control panel controls which one the public page shows ("Public page
-is currently showing: ..."); the intended flow is practice first, then
-"Switch to race lineup" once practice wraps up. The public page picks up a
-schedule switch on its next 60s poll without a reload.
+duration of either laps or minutes), by hand or by uploading an Excel/CSV
+file (same pattern as the race lineup upload, with its own template under
+`public/templates/practice-schedule-template.*`). It has its own
+advance/back/restart controls, run independently of the race lineup's
+position. A toggle on the event control panel controls which one the public
+page shows ("Public page is currently showing: ..."); the intended flow is
+practice first, then "Switch to race lineup" once practice wraps up. The
+public page picks up a schedule switch on its next 60s poll without a
+reload.
+
+On the promoter's control panel, the Practice and Race sections are each a
+native `<details>` element that starts open for whichever schedule is
+currently active and collapsed (with a "(not showing publicly)" note) for
+the other — so a busy promoter isn't scrolling past controls for the
+schedule that isn't running, but can still expand it to check something.
+The advance/back/restart buttons for the inactive schedule are disabled,
+both in the UI and (redundantly, for safety) in the Server Actions
+themselves, which no-op if the schedule they target isn't the active one.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
@@ -92,9 +104,13 @@ account.
 - `src/lib/schedule-import.ts` — parses an uploaded `.xlsx`/`.csv` schedule
   (via `exceljs`/`papaparse`) into the lineup shape, matching column headers
   flexibly and validating that every gate drop within a race shares one lap
-  count. `public/templates/` holds the downloadable templates promoters fill
-  out; regenerate the `.xlsx` one with `npm run generate:template` after
-  changing its columns (the `.csv` is a plain text file, edit it directly).
+  count; also exports the shared `readRawRows` CSV/XLSX row reader used by
+  `src/lib/practice-schedule-import.ts` (same idea, flat rows, requires
+  exactly one of a "Minutes"/"Laps" column per row). `public/templates/`
+  holds the downloadable templates promoters fill out; regenerate the
+  `.xlsx` ones with `npm run generate:template` / `generate:practice-template`
+  after changing their columns (the `.csv` ones are plain text, edit
+  directly).
 - `src/actions` — Server Actions (mutations); `src/lib` — data access,
   session/auth, validation.
 - `prisma/schema.prisma` — data model (`User`, `Event`, `Race`, `GateDrop`,

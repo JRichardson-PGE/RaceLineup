@@ -89,6 +89,7 @@ async function withEventAccess(formData: FormData) {
 
 export async function advanceRaceAction(formData: FormData) {
   const event = await withEventAccess(formData);
+  if (event.activeSchedule !== "RACE") return;
   await advanceRace(event.id);
   revalidatePath(`/dashboard/events/${event.id}`);
   revalidatePath(`/events/${event.slug}`);
@@ -96,6 +97,7 @@ export async function advanceRaceAction(formData: FormData) {
 
 export async function moveBackRaceAction(formData: FormData) {
   const event = await withEventAccess(formData);
+  if (event.activeSchedule !== "RACE") return;
   await moveBackRace(event.id);
   revalidatePath(`/dashboard/events/${event.id}`);
   revalidatePath(`/events/${event.slug}`);
@@ -103,6 +105,7 @@ export async function moveBackRaceAction(formData: FormData) {
 
 export async function restartLineupAction(formData: FormData) {
   const event = await withEventAccess(formData);
+  if (event.activeSchedule !== "RACE") return;
   await restartLineup(event.id);
   revalidatePath(`/dashboard/events/${event.id}`);
   revalidatePath(`/events/${event.slug}`);

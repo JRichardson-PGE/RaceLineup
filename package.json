@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:template": "tsx scripts/generate-template.ts"
+    "generate:template": "tsx scripts/generate-template.ts",
+    "generate:practice-template": "tsx scripts/generate-practice-template.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

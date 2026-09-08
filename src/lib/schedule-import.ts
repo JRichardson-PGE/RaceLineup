@@ -62,7 +62,7 @@ export type ScheduleImportResult =
   | { success: true; lineup: LineupInput }
   | { success: false; error: string };
 
-async function readRawRows(
+export async function readRawRows(
   buffer: Buffer,
   isCsv: boolean
 ): Promise<{ rows: Record<string, unknown>[] } | { error: string }> {
