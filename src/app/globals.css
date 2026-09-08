@@ -3,6 +3,7 @@
 :root {
   --background: #f9fafb;
   --foreground: #171717;
+  --site-header-height: 57px;
   color-scheme: light;
 }
 

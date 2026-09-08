@@ -6,7 +6,10 @@ export async function SiteHeader() {
   const session = await getSession();
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header
+      id="site-header"
+      className="sticky top-0 z-30 border-b border-gray-200 bg-white"
+    >
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 p-4">
         <nav className="flex flex-wrap items-center gap-4 text-sm font-medium">
           <Link href="/events" className="text-gray-900">

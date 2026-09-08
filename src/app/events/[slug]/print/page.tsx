@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
-import { requireEventAccess, requireUser } from "@/lib/auth";
-import { getEventById } from "@/lib/lineup";
+import { getEventBySlugPublic } from "@/lib/lineup";
 import { PrintButton } from "@/components/PrintButton";
 import { BackButton } from "@/components/BackButton";
 import { LineupPrintTable } from "@/components/LineupPrintTable";
+
+export const dynamic = "force-dynamic";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString(undefined, {
@@ -14,13 +15,11 @@ function formatDate(date: Date) {
   });
 }
 
-export default async function PrintLineupPage({
+export default async function PublicPrintLineupPage({
   params,
-}: PageProps<"/dashboard/events/[id]/print">) {
-  const { id } = await params;
-  const user = await requireUser();
-  await requireEventAccess(id, user);
-  const event = await getEventById(id);
+}: PageProps<"/events/[slug]/print">) {
+  const { slug } = await params;
+  const event = await getEventBySlugPublic(slug);
 
   if (!event) notFound();
 

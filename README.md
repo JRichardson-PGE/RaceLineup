@@ -22,17 +22,23 @@ logged-in user has a profile page (linked from their name in the header) to
 change their own password or attach/update a recovery email.
 
 Both the public and dashboard event lists split into "Upcoming" and "Past"
-sections by date automatically. Each event's control panel has "Copy link",
-"Show QR code", and "Print PDF" buttons — the last opens a print-ready,
+sections by date automatically. Each event's control panel — and the public
+event page itself — has a "Print PDF" button that opens a print-ready,
 letter-size table of the lineup (race/laps/gate/class/riders, grouped and
-bordered by race, with headers repeating on each printed page) that the
-promoter prints or saves as a PDF from the browser's print dialog.
+bordered by race, with headers repeating on each printed page); a "Back"
+button on that page returns to wherever the visitor came from. The dashboard
+control panel also has "Copy link" and "Show QR code" for sharing the public
+page.
 
 On the dashboard, the lineup is its own scrollable panel below the fixed
 control buttons, auto-scrolling to the current race whenever it changes (and
-back to the top on restart). The public page keeps its event header pinned
-in place (`position: sticky`) while the lineup scrolls beneath it, and
-auto-scrolls to the current race once when the page first loads.
+back to the top on restart). On the public page, both the site's top nav bar
+and the event's own header (name/location/date) are pinned in place
+(`position: sticky`, stacked one below the other — see
+`HeaderHeightObserver`, which keeps a `--site-header-height` CSS variable in
+sync so the event header sits exactly below the nav bar regardless of its
+height) while the lineup scrolls beneath them, and auto-scrolls to the
+current race once when the page first loads.
 
 **Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · PostgreSQL
 via Prisma 7 (driver adapter) · Custom email/password auth (JWT session
