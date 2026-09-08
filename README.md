@@ -232,7 +232,8 @@ docker compose logs -f app   # confirm migrations applied and it's Ready
 
 Either way, the app container's entrypoint runs `prisma migrate deploy`
 automatically before starting, so the database schema is created on first
-boot. Visit `http://<your-domain-or-ip>/` to confirm it's up.
+boot. Visit `http://<your-domain-or-ip>/` to confirm it's up — don't sign in
+yet, though (see the note at the start of step 4).
 
 Create the first admin account:
 
@@ -240,10 +241,15 @@ Create the first admin account:
 docker compose exec app npx prisma db seed
 ```
 
-Sign in with the printed credentials, then create your real account(s) under
-**Promoters** and change/remove the seed admin.
+This only prints credentials; hold onto them; you'll sign in with them
+after HTTPS is set up in step 4, not now.
 
 ### 4. Add HTTPS
+
+Do this before signing in for the first time: the session cookie is always
+marked `Secure` in production, which browsers silently refuse to store over
+plain HTTP — so signing in at the `http://` URL from step 3 won't actually
+keep you logged in. Get a certificate first:
 
 ```bash
 sudo docker run -it --rm \
@@ -266,6 +272,10 @@ docker compose restart nginx
 
 Renew certificates periodically (e.g. a monthly cron job running the same
 `certbot certonly` command, then `docker compose restart nginx`).
+
+Now visit `https://your-domain.com`, sign in with the credentials from
+step 3's seed command, and create your real account(s) under **Promoters**;
+change or remove the seed admin once you have one.
 
 ### Redeploying after code changes
 
