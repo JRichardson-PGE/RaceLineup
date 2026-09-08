@@ -75,6 +75,10 @@ export const eventDetailsSchema = z.object({
     .toLowerCase()
     .min(1, "URL slug is required")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only"),
+  // Only meaningful (and only enforced) when an admin submits the form —
+  // see createEventAction/updateEventAction. A promoter's own submission
+  // never includes this field.
+  promoterId: z.string().trim().min(1).optional(),
 });
 
 export const classEntrySchema = z.object({

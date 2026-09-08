@@ -16,7 +16,23 @@ function readEventDetails(formData: FormData) {
     location: formData.get("location"),
     eventDate: formData.get("eventDate"),
     slug: rawSlug.length > 0 ? rawSlug : slugify(name),
+    promoterId: formData.get("promoterId") ?? undefined,
   };
+}
+
+async function resolvePromoterId(
+  requestedPromoterId: string | undefined
+): Promise<{ promoterId: string } | { error: string }> {
+  if (!requestedPromoterId) {
+    return { error: "Select a promoter to own this event." };
+  }
+  const promoter = await prisma.user.findUnique({
+    where: { id: requestedPromoterId },
+  });
+  if (!promoter || promoter.role !== "PROMOTER") {
+    return { error: "Select a valid promoter." };
+  }
+  return { promoterId: promoter.id };
 }
 
 export async function createEventAction(
@@ -37,13 +53,20 @@ export async function createEventAction(
     return { error: "That URL slug is already taken. Choose another." };
   }
 
+  let promoterId = user.sub;
+  if (user.role === "ADMIN") {
+    const resolved = await resolvePromoterId(parsed.data.promoterId);
+    if ("error" in resolved) return resolved;
+    promoterId = resolved.promoterId;
+  }
+
   const event = await prisma.event.create({
     data: {
       name: parsed.data.name,
       location: parsed.data.location,
       eventDate: new Date(parsed.data.eventDate),
       slug: parsed.data.slug,
-      promoterId: user.sub,
+      promoterId,
       activeSchedule: "PRACTICE",
     },
   });
@@ -74,6 +97,13 @@ export async function updateEventAction(
     }
   }
 
+  let promoterId = event.promoterId;
+  if (user.role === "ADMIN") {
+    const resolved = await resolvePromoterId(parsed.data.promoterId);
+    if ("error" in resolved) return resolved;
+    promoterId = resolved.promoterId;
+  }
+
   await prisma.event.update({
     where: { id: event.id },
     data: {
@@ -81,6 +111,7 @@ export async function updateEventAction(
       location: parsed.data.location,
       eventDate: new Date(parsed.data.eventDate),
       slug: parsed.data.slug,
+      promoterId,
     },
   });
 
@@ -98,6 +129,22 @@ export async function togglePublishAction(formData: FormData) {
   await prisma.event.update({
     where: { id: event.id },
     data: { published: !event.published },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/events/${event.id}`);
+  revalidatePath(`/events/${event.slug}`);
+  revalidatePath("/events");
+}
+
+export async function completeEventAction(formData: FormData) {
+  const user = await requireRole("PROMOTER");
+  const eventId = String(formData.get("eventId") ?? "");
+  const event = await requireEventAccess(eventId, user);
+
+  await prisma.event.update({
+    where: { id: event.id },
+    data: { completed: true },
   });
 
   revalidatePath("/dashboard");

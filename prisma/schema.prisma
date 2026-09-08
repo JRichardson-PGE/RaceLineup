@@ -36,6 +36,7 @@ model Event {
   location  String
   eventDate DateTime @db.Date
   published Boolean  @default(false)
+  completed Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

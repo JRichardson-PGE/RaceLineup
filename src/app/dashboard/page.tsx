@@ -21,6 +21,7 @@ type DashboardEvent = {
   location: string;
   eventDate: Date;
   published: boolean;
+  completed: boolean;
   promoterName: string | null;
 };
 
@@ -42,6 +43,11 @@ function EventCard({ event }: { event: DashboardEvent }) {
           >
             {event.published ? "Published" : "Draft"}
           </span>
+          {event.completed && (
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-blue-700">
+              Completed
+            </span>
+          )}
         </div>
         <p className="text-sm text-gray-500">
           {event.location} &middot; {formatDate(event.eventDate)}

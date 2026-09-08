@@ -23,21 +23,49 @@ export type EventWithLineup = NonNullable<
   Awaited<ReturnType<typeof getEventById>>
 >;
 
-export function getEventById(id: string) {
+// Events more than this many days past their date auto-complete themselves
+// (dropping out of public view) even if a promoter never clicks "Mark
+// complete" — see autoCompletePastEvents.
+const AUTO_COMPLETE_AFTER_DAYS = 3;
+
+function autoCompleteCutoff(): Date {
+  const now = new Date();
+  const todayUtc = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  return new Date(todayUtc - AUTO_COMPLETE_AFTER_DAYS * 24 * 60 * 60 * 1000);
+}
+
+// Called at the top of every function that lists or fetches events, so an
+// event's completed state is always up to date by the time it's read —
+// there's no background job, so this lazily "catches up" on each request.
+export async function autoCompletePastEvents(): Promise<void> {
+  await prisma.event.updateMany({
+    where: { completed: false, eventDate: { lt: autoCompleteCutoff() } },
+    data: { completed: true },
+  });
+}
+
+export async function getEventById(id: string) {
+  await autoCompletePastEvents();
   return prisma.event.findUnique({
     where: { id },
     include: eventScheduleInclude,
   });
 }
 
-export function getEventBySlugPublic(slug: string) {
+export async function getEventBySlugPublic(slug: string) {
+  await autoCompletePastEvents();
   return prisma.event.findFirst({
-    where: { slug, published: true },
+    where: { slug, published: true, completed: false },
     include: eventScheduleInclude,
   });
 }
 
-export function getEventBySlugSummary(slug: string) {
+export async function getEventBySlugSummary(slug: string) {
+  await autoCompletePastEvents();
   return prisma.event.findUnique({
     where: { slug },
     select: {
@@ -45,18 +73,21 @@ export function getEventBySlugSummary(slug: string) {
       location: true,
       eventDate: true,
       published: true,
+      completed: true,
     },
   });
 }
 
-export function listEventsForPromoter(promoterId: string) {
+export async function listEventsForPromoter(promoterId: string) {
+  await autoCompletePastEvents();
   return prisma.event.findMany({
     where: { promoterId },
     orderBy: { eventDate: "desc" },
   });
 }
 
-export function listAllEvents(promoterNameFilter?: string) {
+export async function listAllEvents(promoterNameFilter?: string) {
+  await autoCompletePastEvents();
   return prisma.event.findMany({
     where: promoterNameFilter
       ? {
@@ -70,16 +101,24 @@ export function listAllEvents(promoterNameFilter?: string) {
   });
 }
 
-export function listEventsPublic(search?: string) {
+export async function listEventsPublic(search?: string) {
+  await autoCompletePastEvents();
   return prisma.event.findMany({
-    where: search
-      ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { promoter: { name: { contains: search, mode: "insensitive" } } },
-          ],
-        }
-      : undefined,
+    where: {
+      completed: false,
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: "insensitive" as const } },
+              {
+                promoter: {
+                  name: { contains: search, mode: "insensitive" as const },
+                },
+              },
+            ],
+          }
+        : {}),
+    },
     orderBy: { eventDate: "desc" },
     include: { promoter: { select: { name: true } } },
   });

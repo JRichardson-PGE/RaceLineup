@@ -69,10 +69,18 @@ export default async function PublicEventPage({
         </p>
       </div>
       <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-        <p className="text-base font-medium text-gray-700">
-          The race lineup is not yet posted.
-        </p>
-        <p className="mt-1 text-sm text-gray-500">Check back soon.</p>
+        {summary.completed ? (
+          <p className="text-base font-medium text-gray-700">
+            This event has concluded.
+          </p>
+        ) : (
+          <>
+            <p className="text-base font-medium text-gray-700">
+              The race lineup is not yet posted.
+            </p>
+            <p className="mt-1 text-sm text-gray-500">Check back soon.</p>
+          </>
+        )}
       </div>
     </main>
   );

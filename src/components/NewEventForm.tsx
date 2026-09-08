@@ -1,58 +1,61 @@
 "use client";
 
-import { useActionState } from "react";
-import { updateEventAction, type EventFormState } from "@/actions/events";
+import Link from "next/link";
+import { useActionState, useState } from "react";
+import { createEventAction, type EventFormState } from "@/actions/events";
+import { slugify } from "@/lib/validation";
 
 const initialState: EventFormState = {};
 
-function toDateInputValue(date: Date | string) {
-  const d = new Date(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  // Use UTC getters: eventDate is stored as a date-only value (UTC midnight),
-  // so local getters could shift it a day in timezones behind UTC.
-  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
-}
-
-export function EditEventForm({
-  event,
+export function NewEventForm({
   promoters,
 }: {
-  event: {
-    id: string;
-    name: string;
-    location: string;
-    eventDate: Date | string;
-    slug: string;
-    promoterId: string;
-  };
   promoters: { id: string; name: string }[] | null;
 }) {
   const [state, formAction, pending] = useActionState(
-    updateEventAction,
+    createEventAction,
     initialState
   );
+  const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
+
+  const isAdmin = promoters !== null;
+  const noPromoters = isAdmin && promoters.length === 0;
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <input type="hidden" name="eventId" value={event.id} />
-      {promoters !== null && (
+      {isAdmin && (
         <div className="flex flex-col gap-1">
           <label htmlFor="promoterId" className="text-sm font-medium text-gray-700">
             Promoter
           </label>
-          <select
-            id="promoterId"
-            name="promoterId"
-            required
-            defaultValue={event.promoterId}
-            className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
-          >
-            {promoters.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
+          {noPromoters ? (
+            <p className="text-sm text-gray-500">
+              No promoter accounts exist yet — admins don&apos;t own events.
+              Create one under{" "}
+              <Link href="/dashboard/admin/promoters" className="text-blue-600 hover:underline">
+                Promoters
+              </Link>{" "}
+              first.
+            </p>
+          ) : (
+            <select
+              id="promoterId"
+              name="promoterId"
+              required
+              defaultValue=""
+              className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
+            >
+              <option value="" disabled>
+                Select a promoter&hellip;
               </option>
-            ))}
-          </select>
+              {promoters.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       )}
       <div className="flex flex-col gap-1">
@@ -64,7 +67,9 @@ export function EditEventForm({
           name="name"
           type="text"
           required
-          defaultValue={event.name}
+          onChange={(e) => {
+            if (!slugTouched) setSlug(slugify(e.target.value));
+          }}
           className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
         />
       </div>
@@ -77,7 +82,6 @@ export function EditEventForm({
           name="location"
           type="text"
           required
-          defaultValue={event.location}
           className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
         />
       </div>
@@ -90,7 +94,6 @@ export function EditEventForm({
           name="eventDate"
           type="date"
           required
-          defaultValue={toDateInputValue(event.eventDate)}
           className="rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
         />
       </div>
@@ -105,7 +108,11 @@ export function EditEventForm({
             name="slug"
             type="text"
             required
-            defaultValue={event.slug}
+            value={slug}
+            onChange={(e) => {
+              setSlug(e.target.value);
+              setSlugTouched(true);
+            }}
             className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900"
           />
         </div>
@@ -113,10 +120,10 @@ export function EditEventForm({
       {state.error && <p className="text-sm text-red-600">{state.error}</p>}
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || noPromoters}
         className="self-start rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {pending ? "Saving..." : "Save changes"}
+        {pending ? "Creating..." : "Create event"}
       </button>
     </form>
   );

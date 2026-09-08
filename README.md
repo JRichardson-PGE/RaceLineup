@@ -13,6 +13,19 @@ have multiple gate drops, and each gate drop can list multiple classes.
 Visiting an unpublished event's link shows "the race lineup is not yet
 posted" rather than a 404, so promoters can safely share a link early.
 
+Since admins don't own events themselves, creating or editing an event as
+an admin adds a required **Promoter** dropdown (existing promoter accounts
+only, not other admins) to assign or reassign ownership; a promoter editing
+their own event doesn't see this field. Once an event is over, a promoter
+can click **Mark event complete** — its public page then shows "This event
+has concluded" instead of the lineup, and it drops off the public events
+list entirely (it still shows on the dashboard, with a "Completed" badge).
+Events also complete themselves automatically: anything more than 3 days
+past its date that hasn't been marked complete gets flipped the next time
+anyone loads a page that lists or fetches events (`autoCompletePastEvents`
+in `lib/lineup.ts`) — there's no background job, so this is a lazy
+catch-up check rather than a scheduled one.
+
 Promoter/admin accounts sign in with either an email or a standalone
 username (an admin can create a promoter with no email at all — useful for
 accounts that shouldn't have self-service password reset). Admins can also
@@ -139,6 +152,8 @@ account.
   default `RACE`) picks which schedule the public page shows;
   `PracticeSession.laps`/`minutes` are both nullable and exactly one is set
   per session (enforced in `practiceSessionSchema`, not the DB).
+  `Event.completed` gates public visibility (see above) independently of
+  `published` — an event can be unpublished and completed at the same time.
 - `src/lib/practice.ts` / `src/actions/practice.ts` mirror `lineup.ts` /
   `actions/lineup.ts` for the practice schedule (advance/back/restart,
   replacing the schedule, switching `activeSchedule`).

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireEventAccess, requireUser } from "@/lib/auth";
 import { getEventById } from "@/lib/lineup";
+import { prisma } from "@/lib/prisma";
 import { EditEventForm } from "@/components/EditEventForm";
 import { deleteEventAction } from "@/actions/events";
 
@@ -14,10 +15,19 @@ export default async function EditEventPage({
 
   if (!event) notFound();
 
+  const promoters =
+    user.role === "ADMIN"
+      ? await prisma.user.findMany({
+          where: { role: "PROMOTER" },
+          orderBy: { name: "asc" },
+          select: { id: true, name: true },
+        })
+      : null;
+
   return (
     <>
       <h1 className="text-2xl font-bold text-gray-900">Edit event</h1>
-      <EditEventForm event={event} />
+      <EditEventForm event={event} promoters={promoters} />
 
       <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
         <h2 className="text-sm font-semibold text-red-800">Danger zone</h2>

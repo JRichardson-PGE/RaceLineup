@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireEventAccess, requireUser } from "@/lib/auth";
 import { getEventById } from "@/lib/lineup";
-import { togglePublishAction } from "@/actions/events";
+import { completeEventAction, togglePublishAction } from "@/actions/events";
 import {
   advanceRaceAction,
   moveBackRaceAction,
@@ -208,6 +208,11 @@ export default async function EventControlPage({
           >
             {event.published ? "Published" : "Draft"}
           </span>
+          {event.completed && (
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-blue-700">
+              Completed
+            </span>
+          )}
           <Link
             href={`/dashboard/events/${event.id}/edit`}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
@@ -235,6 +240,17 @@ export default async function EventControlPage({
               {event.published ? "Unpublish" : "Publish"}
             </button>
           </form>
+          {!event.completed && (
+            <form action={completeEventAction}>
+              <input type="hidden" name="eventId" value={event.id} />
+              <ConfirmSubmitButton
+                confirmMessage="Mark this event complete? It will disappear from the public event list and its page will show 'This event has concluded.' This cannot be undone."
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Mark event complete
+              </ConfirmSubmitButton>
+            </form>
+          )}
         </div>
       </div>
 
