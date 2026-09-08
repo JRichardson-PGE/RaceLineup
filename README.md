@@ -78,7 +78,13 @@ point is for it to end up on paper.
 
 On the dashboard, the lineup is its own scrollable panel below the fixed
 control buttons, auto-scrolling to the current race whenever it changes (and
-back to the top on restart). On the public page, both the site's top nav bar
+back to the top on restart). That auto-scroll deliberately doesn't use
+`el.scrollIntoView()` — on a page taller than the viewport (any phone),
+that call scrolls the whole page too, not just the panel, dragging the
+fixed controls above it off-screen. `LineupFrame`/`PracticeFrame` instead
+compute the target offset via `getBoundingClientRect()` and call
+`container.scrollTo()` directly on the panel, so only the panel itself
+ever moves. On the public page, both the site's top nav bar
 and the event's own header (name/location/date) are pinned in place
 (`position: sticky`, stacked one below the other — see
 `HeaderHeightObserver`, which keeps a `--site-header-height` CSS variable in

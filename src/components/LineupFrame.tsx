@@ -23,8 +23,28 @@ export function LineupFrame({
       return;
     }
 
-    const el = container.querySelector(`[data-race-id="${currentRaceId}"]`);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const el = container.querySelector<HTMLElement>(
+      `[data-race-id="${currentRaceId}"]`
+    );
+    if (!el) return;
+
+    // Scroll only this frame, not the page — el.scrollIntoView() also drags
+    // the whole page along with it on mobile, shoving the control buttons
+    // (which sit above this frame) off-screen. Using getBoundingClientRect
+    // (viewport-relative) rather than offsetTop, since neither el nor
+    // container establish a CSS positioning context for offsetTop to be
+    // reliably measured against.
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const delta =
+      elRect.top -
+      containerRect.top -
+      container.clientHeight / 2 +
+      el.clientHeight / 2;
+    container.scrollTo({
+      top: container.scrollTop + delta,
+      behavior: "smooth",
+    });
   }, [currentRaceId]);
 
   return (
