@@ -213,15 +213,20 @@ eslint/Tailwind/`@types/*` (build-only weight) out of the running container.
   sudo usermod -aG docker $USER
   # log out and back in for the group change to apply, then:
   DOCKER_COMPOSE_VERSION=v2.32.1
+  sudo mkdir -p /usr/local/lib/docker/cli-plugins
   sudo curl -SL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-$(uname -m)" \
-    -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+    -o /usr/local/lib/docker/cli-plugins/docker-compose
+  sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
   ```
 
   (`$(uname -m)` picks the right binary automatically — `aarch64` on
-  Graviton, `x86_64` on Intel/AMD. On Ubuntu, follow
+  Graviton, `x86_64` on Intel/AMD. This installs it as a CLI plugin — the
+  `docker compose` subcommand used throughout this README, not the older
+  standalone `docker-compose` — so it has to go in a plugin directory
+  Docker actually scans, not just anywhere on `$PATH`. On Ubuntu, follow
   [Docker's Ubuntu install guide](https://docs.docker.com/engine/install/ubuntu/)
-  instead of `dnf`.)
+  instead of `dnf` — it installs the `docker-compose-plugin` package
+  directly, so this manual step isn't needed there.)
 
 ### 2. Get the code onto the server and configure it
 
