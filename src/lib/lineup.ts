@@ -48,6 +48,14 @@ export async function autoCompletePastEvents(): Promise<void> {
   });
 }
 
+// True once an event is far enough past its date that autoCompletePastEvents
+// would (re-)complete it on the next read — used to block "uncomplete",
+// since un-completing one of these would just revert on the very next
+// page load.
+export function isPastAutoCompleteWindow(eventDate: Date): boolean {
+  return eventDate.getTime() < autoCompleteCutoff().getTime();
+}
+
 export async function getEventById(id: string) {
   await autoCompletePastEvents();
   return prisma.event.findUnique({

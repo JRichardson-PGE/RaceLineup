@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireEventAccess, requireRole } from "@/lib/auth";
+import { isPastAutoCompleteWindow } from "@/lib/lineup";
 import { eventDetailsSchema, slugify } from "@/lib/validation";
 
 export type EventFormState = { error?: string };
@@ -145,6 +146,26 @@ export async function completeEventAction(formData: FormData) {
   await prisma.event.update({
     where: { id: event.id },
     data: { completed: true },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/events/${event.id}`);
+  revalidatePath(`/events/${event.slug}`);
+  revalidatePath("/events");
+}
+
+export async function uncompleteEventAction(formData: FormData) {
+  const user = await requireRole("PROMOTER");
+  const eventId = String(formData.get("eventId") ?? "");
+  const event = await requireEventAccess(eventId, user);
+
+  // Mirrors the disabled state on the button — an event this far past its
+  // date would just auto-complete itself again on the next page load.
+  if (isPastAutoCompleteWindow(event.eventDate)) return;
+
+  await prisma.event.update({
+    where: { id: event.id },
+    data: { completed: false },
   });
 
   revalidatePath("/dashboard");

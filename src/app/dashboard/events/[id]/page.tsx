@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { requireEventAccess, requireUser } from "@/lib/auth";
-import { getEventById } from "@/lib/lineup";
-import { completeEventAction, togglePublishAction } from "@/actions/events";
+import { getEventById, isPastAutoCompleteWindow } from "@/lib/lineup";
+import {
+  completeEventAction,
+  togglePublishAction,
+  uncompleteEventAction,
+} from "@/actions/events";
 import {
   advanceRaceAction,
   moveBackRaceAction,
@@ -38,6 +42,8 @@ export default async function EventControlPage({
   const event = await getEventById(id);
 
   if (!event) return null;
+
+  const pastAutoCompleteWindow = isPastAutoCompleteWindow(event.eventDate);
 
   const isRaceActive = event.activeSchedule === "RACE";
   const isPracticeActive = event.activeSchedule === "PRACTICE";
@@ -240,14 +246,30 @@ export default async function EventControlPage({
               {event.published ? "Unpublish" : "Publish"}
             </button>
           </form>
-          {!event.completed && (
+          {!event.completed ? (
             <form action={completeEventAction}>
               <input type="hidden" name="eventId" value={event.id} />
               <ConfirmSubmitButton
-                confirmMessage="Mark this event complete? It will disappear from the public event list and its page will show 'This event has concluded.' This cannot be undone."
+                confirmMessage="Mark this event complete? It will disappear from the public event list and its page will show 'This event has concluded.'"
                 className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
               >
                 Mark event complete
+              </ConfirmSubmitButton>
+            </form>
+          ) : (
+            <form action={uncompleteEventAction}>
+              <input type="hidden" name="eventId" value={event.id} />
+              <ConfirmSubmitButton
+                confirmMessage="Uncomplete this event? It will show up in the public event list and on its page again."
+                disabled={pastAutoCompleteWindow}
+                title={
+                  pastAutoCompleteWindow
+                    ? "You cannot uncomplete events that are more than 3 days in the past"
+                    : undefined
+                }
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+              >
+                Uncomplete event
               </ConfirmSubmitButton>
             </form>
           )}

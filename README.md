@@ -24,7 +24,12 @@ Events also complete themselves automatically: anything more than 3 days
 past its date that hasn't been marked complete gets flipped the next time
 anyone loads a page that lists or fetches events (`autoCompletePastEvents`
 in `lib/lineup.ts`) — there's no background job, so this is a lazy
-catch-up check rather than a scheduled one.
+catch-up check rather than a scheduled one. A completed event can be
+un-completed from the same button, but only within that same 3-day
+window — `isPastAutoCompleteWindow` gates the button (disabled, with a
+tooltip explaining why) and the server action itself, since uncompleting
+an event past that window would just have it auto-complete again on the
+very next page load.
 
 Promoter/admin accounts sign in with either an email or a standalone
 username (an admin can create a promoter with no email at all — useful for
