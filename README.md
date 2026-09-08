@@ -250,3 +250,7 @@ transitive dependencies of the Prisma CLI's config loader (not used by the
 running app, which only talks to Postgres via `pg`/`@prisma/adapter-pg`).
 Fixing them requires downgrading to Prisma 6. Left as-is; revisit when Prisma
 ships a patched 7.x.
+
+## License
+
+[MIT](LICENSE)
