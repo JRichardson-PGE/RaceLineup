@@ -41,8 +41,8 @@ export default function GuidePage() {
           </div>
           <GuideNav />
           <div className="toc-foot">
-            RaceLineup is built for one job: keep everyone at the gate
-            looking at the same lineup you are.
+            RaceLineup is built for one job: keep everyone at the race up to
+            date on where the race is at in the schedule.
           </div>
         </aside>
 
