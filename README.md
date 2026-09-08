@@ -40,7 +40,10 @@ accounts that shouldn't have self-service password reset). Admins can also
 delete accounts (which deletes that promoter's events too), reset any
 account's password, and filter the all-events view by promoter name. Every
 logged-in user has a profile page (linked from their name in the header) to
-change their own password or attach/update a recovery email.
+change their own password or attach/update a recovery email. Logged-in
+users also see a **How to Use** link in the header pointing to the
+Promoter Playbook (`PROMOTER_PLAYBOOK_URL` in `SiteHeader.tsx`) — a
+step-by-step guide covering the full promoter workflow.
 
 Both the public and dashboard event lists split into "Upcoming" and "Past"
 sections by date automatically, and both show the event's promoter name. On
