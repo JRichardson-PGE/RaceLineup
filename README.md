@@ -424,7 +424,7 @@ change here. One-time setup:
        "Principal": {
          "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
        },
-       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Action": ["sts:AssumeRoleWithWebIdentity", "sts:TagSession"],
        "Condition": {
          "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
          "StringLike": { "token.actions.githubusercontent.com:sub": "repo:<github-username-or-org>/RaceLineup:*" }
@@ -432,6 +432,13 @@ change here. One-time setup:
      }]
    }
    ```
+
+   `sts:TagSession` is required alongside `sts:AssumeRoleWithWebIdentity` —
+   `aws-actions/configure-aws-credentials` attaches the GitHub context
+   (repo, branch, actor, etc.) as session tags by default, and without this
+   the whole call is rejected with a misleading "Not authorized to perform
+   sts:AssumeRoleWithWebIdentity" error that has nothing to do with the
+   AssumeRoleWithWebIdentity permission itself.
 
    Attach a permissions policy to that role scoped to just this repository
    (push access to ECR):
