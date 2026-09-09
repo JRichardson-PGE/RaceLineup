@@ -362,8 +362,29 @@ plain `location /` block in the port-80 server with a redirect to HTTPS
 docker compose restart nginx
 ```
 
-Renew certificates periodically (e.g. a monthly cron job running the same
-`certbot certonly` command, then `docker compose restart nginx`).
+That one-time `certonly --standalone` command is only for the very first
+certificate, before nginx has anything valid to serve over 443. After that,
+renewal is automatic: the `certbot` service in `docker-compose.yml` runs
+`certbot renew` on a loop every 12 hours using the **webroot** method
+(`-w /var/www/certbot`), which nginx already serves at
+`/.well-known/acme-challenge/` — so renewal doesn't need port 80 free and
+never stops nginx. `certbot renew` itself only actually renews a
+certificate once it's within 30 days of expiring, so most runs are no-ops.
+
+nginx does still need telling to pick up a renewed certificate — it reads
+`fullchain.pem`/`privkey.pem` once at startup and won't notice the files
+changing underneath it — so add one more crontab entry (`crontab -e`) on
+the instance to reload it daily (a plain `nginx -s reload` is a graceful,
+zero-downtime reread of config and certs, not a restart, so this is safe
+to run whether or not a renewal actually happened that day):
+
+```cron
+0 4 * * * cd /home/ec2-user/racelineup && docker compose exec -T nginx nginx -s reload >> /home/ec2-user/nginx-reload.log 2>&1
+```
+
+After adding the `certbot` service to an already-running deployment, bring
+it up with `docker compose up -d` so Compose creates the new container
+without touching `app`/`db`/`nginx`.
 
 Now visit `https://your-domain.com`, sign in with the credentials from
 step 3's seed command, and create your real account(s) under **Promoters**;
